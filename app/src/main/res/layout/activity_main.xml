@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".view.MainActivity">
+
+    <!-- Background Image -->
+    <ImageView
+        android:id="@+id/backgroundImage"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ocean1"
+        android:alpha="0.9" />
+
+    <!-- RecyclerView -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvQuote"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingBottom="25dp"
+        android:overScrollMode="never"
+        tools:listitem="@layout/item_list" />
+
+    <FrameLayout
+        android:id="@+id/bottomBarContainer"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:layout_marginBottom="15dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_gravity="bottom"
+       >
+
+        <LinearLayout
+            android:id="@+id/bottomBar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:padding="8dp"
+            android:gravity="center_vertical">
+
+            <!-- Left Section: General Button -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingStart="8dp"
+                android:gravity="center_vertical|start"
+                android:orientation="horizontal">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnGeneral"
+                    android:layout_width="wrap_content"
+                    android:layout_height="48dp"
+                    android:text="General"
+                    android:textColor="@android:color/black"
+                    android:backgroundTint="@color/white"
+                    app:icon="@drawable/ic_general"
+                    app:iconTint="@android:color/black"
+                    app:iconGravity="start"
+                    app:iconPadding="8dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:gravity="center_vertical" />
+            </LinearLayout>
+
+            <!-- Right Section: Theme and Profile Buttons -->
+            <LinearLayout
+                android:id="@+id/btnRight"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="end|center_vertical"
+                android:orientation="horizontal"
+                android:paddingEnd="8dp">
+
+                <ImageButton
+                    android:id="@+id/btnTheme"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_margin="8dp"
+                    android:backgroundTint="@color/white"
+                    android:contentDescription="Theme"
+                    android:elevation="4dp"
+                    android:padding="12dp"
+                    android:scaleType="centerInside"
+                    android:background="@drawable/bg_circle_white"
+                    android:src="@drawable/ic_theme1"
+                    app:tint="@android:color/black" />
+
+                <ImageButton
+                    android:id="@+id/btnProfile"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_margin="8dp"
+                    android:backgroundTint="@color/white"
+                    android:contentDescription="Profile"
+                    android:elevation="4dp"
+                    android:padding="12dp"
+                    android:scaleType="centerInside"
+                    android:background="@drawable/bg_circle_white"
+                    android:src="@drawable/ic_user"
+                    app:tint="@android:color/black" />
+
+
+            </LinearLayout>
+
+        </LinearLayout>
+    </FrameLayout>
+
+</FrameLayout>
