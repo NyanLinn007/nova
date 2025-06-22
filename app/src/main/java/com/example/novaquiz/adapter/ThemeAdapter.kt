@@ -1,11 +1,13 @@
 package com.example.novaquiz.adapter
 
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import androidx.recyclerview.widget.RecyclerView
 import com.example.novaquiz.R
+import com.example.novaquiz.view.EditThemeActivity
 
 class ThemeAdapter : RecyclerView.Adapter<ThemeAdapter.ThemeViewHolder>() {
 
@@ -21,7 +23,15 @@ class ThemeAdapter : RecyclerView.Adapter<ThemeAdapter.ThemeViewHolder>() {
     }
 
     override fun onBindViewHolder(holder: ThemeViewHolder, position: Int) {
-        holder.button.text = titles[position]
+        val title = titles[position]
+        holder.button.text=title
+        holder.button.setOnClickListener {
+            if(title=="Edit"){
+                val context = holder.itemView.context
+                val intent = Intent(context, EditThemeActivity::class.java)
+                context.startActivity(intent)
+            }
+        }
     }
 
     override fun getItemCount(): Int {

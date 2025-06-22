@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Your main content layout -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/main"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/cloudy"
+        tools:context=".view.EditThemeActivity">
+
+        <!-- Close Button -->
+        <ImageView
+            android:id="@+id/btnClose"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="16dp"
+            android:contentDescription="Close"
+            app:srcCompat="@drawable/ic_close"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Centered Quote Text -->
+
+        <!-- Text Edit Panel -->
+        <EditText
+            android:id="@+id/txtdefault"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:cursorVisible="false"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:gravity="center"
+            android:imeOptions="actionDone"
+            android:inputType="textMultiLine"
+            android:maxLines="5"
+            android:padding="16dp"
+            android:text="Sometimes bravery looks like\nasking for help."
+            android:textAlignment="center"
+            android:textColor="@android:color/white"
+            android:textCursorDrawable="@null"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <LinearLayout
+            android:id="@+id/textLayout"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:orientation="horizontal"
+            android:background="@drawable/bg_rounded_dark"
+            android:gravity="center"
+            android:paddingHorizontal="16dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="15dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@id/bottomTab"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Aa"
+                android:textColor="@android:color/white"
+                android:textSize="20sp"
+                android:gravity="center" />
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:src="@drawable/ic_color"
+                android:tint="@android:color/white"
+                android:scaleType="centerInside" />
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:src="@drawable/ic_menu"
+                android:tint="@android:color/white"
+                android:scaleType="centerInside" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Aa"
+                android:textColor="@android:color/white"
+                android:textSize="20sp"
+                android:gravity="center" />
+        </LinearLayout>
+
+        <!-- Background Edit Panel -->
+        <LinearLayout
+            android:id="@+id/backgroundLayout"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:orientation="horizontal"
+            android:background="@drawable/bg_rounded_dark"
+            android:gravity="center"
+            android:paddingHorizontal="16dp"
+            android:layout_marginBottom="8dp"
+            android:visibility="visible"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="15dp"
+            app:layout_constraintBottom_toTopOf="@id/bottomTab"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:src="@drawable/ic_theme"
+                android:tint="@android:color/white"
+                android:scaleType="centerInside" />
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:src="@drawable/ic_gallary"
+                android:tint="@android:color/white"
+                android:scaleType="centerInside" />
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:src="@drawable/ic_profile"
+                android:tint="@android:color/white"
+                android:scaleType="centerInside" />
+        </LinearLayout>
+
+        <!-- Bottom Tabs -->
+        <LinearLayout
+            android:id="@+id/bottomTab"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:orientation="horizontal"
+            android:background="@drawable/bg_rounded_dark"
+            android:gravity="center"
+            android:padding="4dp"
+            android:weightSum="2"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="15dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginBottom="24dp">
+
+            <TextView
+                android:id="@+id/txtBackground"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="Background"
+                android:textColor="@android:color/white"
+                android:gravity="center"
+                android:background="@drawable/bg_tab_selected" />
+
+            <TextView
+                android:id="@+id/txtText"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/bg_tab_unselected"
+                android:gravity="center"
+                android:text="Text"
+                android:textColor="@android:color/white" />
+        </LinearLayout>
+
+        <SeekBar
+            android:id="@+id/fontSeekBar"
+            android:layout_width="230dp"
+            android:layout_height="250dp"
+            android:rotation="-90"
+            android:progress="8"
+             android:max="28"
+            android:progressDrawable="@drawable/custom_progress_drawable"
+            android:layout_marginEnd="32dp"
+            android:layout_marginBottom="32dp"
+            android:layout_marginStart="320dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Absolute slider: overlaps everything, center right -->
+
+
+
+
+</FrameLayout>

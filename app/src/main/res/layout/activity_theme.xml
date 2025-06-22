@@ -119,21 +119,35 @@
                 app:layout_constraintStart_toStartOf="@+id/textView10"
                 app:layout_constraintTop_toBottomOf="@id/rvmixes" />
 
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvforyou"
+            <FrameLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:padding="8dp"
                 android:layout_marginTop="10dp"
-                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-                app:spanCount="3"
-                android:nestedScrollingEnabled="false"
-                tools:listitem="@layout/list_foryou"
                 app:layout_constraintTop_toBottomOf="@id/textView11"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintEnd_toEndOf="parent">
 
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvforyou"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="25dp"
+                    android:clipToPadding="false"
+                    android:nestedScrollingEnabled="false"
+                    android:overScrollMode="never"
+                    app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                    app:spanCount="3"
+                    tools:listitem="@layout/list_foryou" />
+
+                <ProgressBar
+                    android:id="@+id/progressBarForyou"
+                    style="?android:attr/progressBarStyleLarge"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_gravity="center"
+                    android:visibility="gone"
+                    android:indeterminateTint="@android:color/white" />
+            </FrameLayout>
 
 
 
