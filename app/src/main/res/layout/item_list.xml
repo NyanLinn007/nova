@@ -58,6 +58,7 @@
             android:layout_height="56dp"
             android:padding="12dp"
             android:background="@drawable/bg_favorite"
+            android:tint="@color/white"
             android:scaleType="centerInside"
             android:src="@drawable/ic_share"
             android:contentDescription="Share" />
@@ -67,6 +68,7 @@
             android:layout_width="56dp"
             android:layout_height="56dp"
             android:layout_marginStart="16dp"
+            android:tint="@color/white"
             android:padding="12dp"
             android:background="@drawable/bg_favorite"
             android:scaleType="centerInside"

@@ -41,7 +41,6 @@
             android:maxLines="5"
             android:padding="16dp"
             android:text="Sometimes bravery looks like\nasking for help."
-            android:textAlignment="center"
             android:textColor="@android:color/white"
             android:textCursorDrawable="@null"
             android:textSize="20sp"
@@ -67,6 +66,7 @@
             app:layout_constraintEnd_toEndOf="parent">
 
             <TextView
+                android:id="@+id/stylefont"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -76,30 +76,82 @@
                 android:gravity="center" />
 
             <ImageView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:id="@+id/imgColorWheel"
+                android:layout_width="35dp"
+                android:layout_height="30dp"
                 android:layout_weight="1"
-                android:src="@drawable/ic_color"
-                android:tint="@android:color/white"
+                android:src="@drawable/colorwheel"
                 android:scaleType="centerInside" />
 
             <ImageView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:id="@+id/imgAlignToggle"
+                android:layout_width="35dp"
+                android:layout_height="30dp"
                 android:layout_weight="1"
-                android:src="@drawable/ic_menu"
+                android:src="@drawable/menu"
+                android:clickable="true"
+                android:focusable="true"
                 android:tint="@android:color/white"
                 android:scaleType="centerInside" />
 
             <TextView
+                android:id="@+id/tvStyleToggle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Aa"
                 android:textColor="@android:color/white"
                 android:textSize="20sp"
-                android:gravity="center" />
+                android:gravity="center"
+                android:clickable="true"
+                android:focusable="true"
+                />
+
+
         </LinearLayout>
+
+        <HorizontalScrollView
+            android:id="@+id/colorScroll"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:visibility="gone"
+            android:layout_marginBottom="8dp"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="15dp"
+            app:layout_constraintBottom_toTopOf="@id/textLayout"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <LinearLayout
+                android:id="@+id/colorContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="8dp"/>
+        </HorizontalScrollView>
+
+        <HorizontalScrollView
+            android:id="@+id/fontStyleScroll"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@id/textLayout"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginBottom="8dp"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="15dp"
+            android:paddingHorizontal="12dp"
+            >
+
+            <LinearLayout
+                android:id="@+id/fontStyleContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:gravity="center_vertical" />
+        </HorizontalScrollView>
 
         <!-- Background Edit Panel -->
         <LinearLayout
@@ -119,27 +171,20 @@
             app:layout_constraintEnd_toEndOf="parent">
 
             <ImageView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_width="35dp"
+                android:layout_height="30dp"
                 android:layout_weight="1"
-                android:src="@drawable/ic_theme"
+                android:src="@drawable/gallary"
                 android:tint="@android:color/white"
                 android:scaleType="centerInside" />
 
-            <ImageView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:src="@drawable/ic_gallary"
-                android:tint="@android:color/white"
-                android:scaleType="centerInside" />
+
 
             <ImageView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_width="35dp"
+                android:layout_height="30dp"
                 android:layout_weight="1"
-                android:src="@drawable/ic_profile"
-                android:tint="@android:color/white"
+                android:src="@drawable/colorwheel"
                 android:scaleType="centerInside" />
         </LinearLayout>
 

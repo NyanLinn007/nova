@@ -65,19 +65,53 @@ class Login : AppCompatActivity() {
         return network != null && network.isConnected
     }
 
-    fun LoginAccount(mail:String,pass:String){
-        FirebaseAuth.getInstance().signInWithEmailAndPassword(mail,pass).addOnCompleteListener { task->
+    fun LoginAccount(mail: String, pass: String) {
+        val auth = FirebaseAuth.getInstance()
+        val db = com.google.firebase.firestore.FirebaseFirestore.getInstance()
+
+        auth.signInWithEmailAndPassword(mail, pass).addOnCompleteListener { task ->
             binding.btnsignin.isEnabled = true
             binding.btnsignin.text = "Sign In"
-            if(task.isSuccessful){
-                val shp=getSharedPreferences("Login", MODE_PRIVATE)
-                val editor=shp.edit()
-                editor.putBoolean("Login",true)
-                editor.commit()
-                Toast.makeText(this,"Login Successfully",Toast.LENGTH_SHORT).show()
-                startActivity(Intent(this,MainActivity::class.java))
-            }else{
-                Toast.makeText(this,"Fail Login ",Toast.LENGTH_SHORT).show()
+
+            if (task.isSuccessful) {
+                val userId = auth.currentUser?.uid
+                if (userId != null) {
+                    db.collection("Users").document(userId).get()
+                        .addOnSuccessListener { document ->
+                            if (document.exists()) {
+                                // Save to SharedPreferences
+                                val shp = getSharedPreferences("UserData", MODE_PRIVATE)
+                                val editor = shp.edit()
+
+                                editor.putBoolean("Login", true)
+                                editor.putString("name", document.getString("name") ?: "")
+                                editor.putString("email", document.getString("email") ?: "")
+                                editor.putString("fontColor", document.getString("fontColor") ?: "#000000")
+                                editor.putString("fontAlign", document.getString("fontAlign") ?: "center")
+                                editor.putString("fontDesign", document.getString("fontDesign") ?: "default")
+                                editor.putString("fontStyle", document.getString("fontStyle") ?: "normal")
+                                editor.putString("themeByUrl", document.getString("themeByUrl") ?: "")
+                                editor.putFloat("fontSize", (document.getLong("fontSize") ?: 20L).toFloat())
+
+                                // If themeColors is an array
+                                val themeColors = document.get("themeColors") as? List<*>
+                                editor.putString("themeColors", themeColors?.joinToString(",") ?: "")
+
+                                editor.apply()
+
+                                Toast.makeText(this, "Login Successfully", Toast.LENGTH_SHORT).show()
+                                startActivity(Intent(this, MainActivity::class.java))
+                                finish()
+                            } else {
+                                Toast.makeText(this, "User data not found", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                        .addOnFailureListener {
+                            Toast.makeText(this, "Failed to load user data", Toast.LENGTH_SHORT).show()
+                        }
+                }
+            } else {
+                Toast.makeText(this, "Fail Login: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
             }
         }
     }

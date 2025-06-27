@@ -11,7 +11,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.novaquiz.R
 import com.example.novaquiz.adapter.AccountAdapter
 import com.example.novaquiz.adapter.FollowAdapter
+import com.example.novaquiz.auth.Login
 import com.example.novaquiz.databinding.ActivityProfileBinding
+import com.google.firebase.auth.FirebaseAuth
 
 class Profile : AppCompatActivity() {
     private lateinit var binding:ActivityProfileBinding
@@ -27,7 +29,33 @@ class Profile : AppCompatActivity() {
         binding.rvAccount.adapter=accountAdapter
 
         binding.rvFollow.layoutManager=LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false)
-        followAdapter= FollowAdapter()
+        followAdapter = FollowAdapter { label ->
+            when (label) {
+                "Logout" -> {
+
+                    val shp = getSharedPreferences("UserData", MODE_PRIVATE)
+                    shp.edit().clear().apply()
+
+                    // Firebase sign out
+                    FirebaseAuth.getInstance().signOut()
+
+                    // Redirect to login
+                    val intent = Intent(this, Login::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    startActivity(intent)
+                    finish()
+                }
+
+                "Profile" -> {
+                    // Already in Profile, maybe show a message or navigate
+                }
+
+                "Setting" -> {
+//                    val intent = Intent(this, SettingActivity::class.java)
+//                    startActivity(intent)
+                }
+            }
+        }
         binding.rvFollow.adapter=followAdapter
         binding.txtDone.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)

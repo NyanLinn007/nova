@@ -15,13 +15,14 @@ import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
+import com.bumptech.glide.Glide
 import com.example.novaquiz.R
 import com.example.novaquiz.adapter.QuoteAdapter
 import com.example.novaquiz.data.Quote
 import com.example.novaquiz.databinding.ActivityMainBinding
-import com.google.firebase.Firebase
+
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.toObject
+
 
 
 class MainActivity : AppCompatActivity() {
@@ -29,12 +30,30 @@ class MainActivity : AppCompatActivity() {
     private  val db=FirebaseFirestore.getInstance()
     private val quoteList = mutableListOf<Quote>()
    private lateinit var adapter:QuoteAdapter
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding=ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        val shp=getSharedPreferences("UserData",Context.MODE_PRIVATE)
+        val fontsize=shp.getFloat("fontSize",16f)
+        val fontColor = shp.getString("fontColor", "#000000") ?: "#000000"
+        val fontAlign = shp.getString("fontAlign", "center") ?: "center"
+        val fontStyle = shp.getString("fontStyle", "normal") ?: "normal"
+        val themeUrl = shp.getString("themeByUrl", "") ?: ""
 
-        adapter=QuoteAdapter(quoteList)
+        if (themeUrl.isNotEmpty()) {
+            Glide.with(this)
+                .load(themeUrl)
+                .placeholder(R.drawable.cloudy)
+                .error(R.drawable.cloudy)
+                .into(binding.backgroundImage)
+        } else {
+            binding.backgroundImage.setImageResource(R.drawable.cloudy)
+        }
+
+
+        adapter=QuoteAdapter(quoteList, fontsize,fontColor,fontAlign,fontStyle)
         binding.rvQuote.layoutManager=LinearLayoutManager(this)
         binding.rvQuote.adapter=adapter
 
@@ -104,6 +123,10 @@ class MainActivity : AppCompatActivity() {
                     quoteList.add(quote)
 
                 }
+
+
+
+
                 adapter.notifyDataSetChanged()
                 showLoading(false)
             }.addOnFailureListener { exception ->

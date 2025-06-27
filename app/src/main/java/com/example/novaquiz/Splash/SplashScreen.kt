@@ -26,10 +26,19 @@ class SplashScreen : AppCompatActivity() {
         logo.startAnimation(zoomIn)
 
         Handler(Looper.getMainLooper()).postDelayed({
-            startActivity(Intent(this, Login::class.java))
-            finish()
-        },3000)
+            val shp = getSharedPreferences("UserData", MODE_PRIVATE)
+            val isLoggedIn = shp.getBoolean("Login", false)
+            val email = shp.getString("email", null)
 
+            if (isLoggedIn && !email.isNullOrEmpty()) {
+                // Already logged in, go to main page
+                startActivity(Intent(this, MainActivity::class.java))
+            } else {
+                // Not logged in yet, go to login
+                startActivity(Intent(this, Login::class.java))
+            }
+            finish()
+        }, 3000)
 
         }
     }

@@ -89,7 +89,13 @@ class Signup : AppCompatActivity() {
                 val userMap = hashMapOf(
                     "name" to name,
                     "email" to email.trim(),
-                    "themeId" to 0
+                    "themeColors" to listOf("#FFFFFF", "#000000"),
+                    "themeByUrl" to "",
+                    "fontSize" to 20,
+                    "fontAlign" to "center",
+                    "fontColor" to "#000000",
+                    "fontDesign" to "default",
+                    "fontStyle" to "normal"
                 )
 
                 if (userId != null) {

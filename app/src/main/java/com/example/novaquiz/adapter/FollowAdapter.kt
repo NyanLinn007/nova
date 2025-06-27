@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.novaquiz.R
 import com.example.novaquiz.adapter.AccountAdapter.AccountViewHolder
 
-class FollowAdapter:RecyclerView.Adapter<FollowAdapter.FollowViewHolder>() {
+class FollowAdapter( private val onItemClick: (String) -> Unit):RecyclerView.Adapter<FollowAdapter.FollowViewHolder>() {
     private val lables= listOf("Profile","Setting","Logout")
     private val startIcon= listOf(
         R.drawable.ic_favourite,
@@ -42,6 +42,10 @@ class FollowAdapter:RecyclerView.Adapter<FollowAdapter.FollowViewHolder>() {
         holder.start.setImageResource(startIcon[ position])
         holder.txtfollow.text=lables[position]
         holder.end.setImageResource(endIcon[ position])
+
+        holder.itemView.setOnClickListener {
+            onItemClick(lables[position])
+        }
     }
 
     override fun getItemCount(): Int {
