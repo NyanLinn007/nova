@@ -9,4 +9,12 @@
         <item name="android:windowCloseOnTouchOutside">false</item>
     </style>
 
+    <style name="FullScreenBottomSheetDialog" parent="Theme.Design.Light.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/FullScreenBottomSheetStyle</item>
+    </style>
+
+    <style name="FullScreenBottomSheetStyle" parent="Widget.Design.BottomSheet.Modal">
+        <item name="android:layout_height">wrap_content</item> <!-- Can be wrap_content or match_parent -->
+    </style>
+
 </resources>

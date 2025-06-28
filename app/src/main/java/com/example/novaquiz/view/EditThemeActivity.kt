@@ -11,6 +11,7 @@ import android.view.View
 import android.widget.LinearLayout
 import android.widget.SeekBar
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.example.novaquiz.R
@@ -64,26 +65,36 @@ class EditThemeActivity : AppCompatActivity() {
         }
 
         binding.txtBackground.setOnClickListener {
+            // Select txtBackground tab
             binding.txtBackground.setBackgroundResource(R.drawable.bg_tab_selected)
             binding.txtText.setBackgroundResource(R.drawable.bg_tab_unselected)
 
+            // Show background editing UI
             binding.backgroundLayout.visibility = View.VISIBLE
             binding.textLayout.visibility = View.GONE
             binding.fontSeekBar.visibility = View.GONE
-
-
+            binding.colorScroll.visibility = View.GONE
+            binding.fontStyleScroll.visibility = View.GONE
+            binding.bgcolorScroll.visibility = View.GONE
         }
 
         binding.txtText.setOnClickListener {
-            binding.txtBackground.setBackgroundResource(R.drawable.bg_tab_unselected)
+            // Select txtText tab
             binding.txtText.setBackgroundResource(R.drawable.bg_tab_selected)
+            binding.txtBackground.setBackgroundResource(R.drawable.bg_tab_unselected)
 
+            // Show text editing UI
             binding.textLayout.visibility = View.VISIBLE
             binding.backgroundLayout.visibility = View.GONE
             binding.fontSeekBar.visibility = View.VISIBLE
-
-
+            binding.bgcolorScroll.visibility = View.GONE
+            binding.fontStyleScroll.visibility = View.GONE
+            binding.colorScroll.visibility = View.GONE
         }
+
+
+
+
 
         var isBold = false
 
@@ -137,15 +148,45 @@ class EditThemeActivity : AppCompatActivity() {
         binding.fontStyleScroll.visibility = View.GONE
         binding.colorScroll.visibility = View.GONE
 
-        binding.imgColorWheel.setOnClickListener {
-            binding.colorScroll.visibility = View.VISIBLE
-            binding.fontStyleScroll.visibility = View.GONE
+        binding.stylefont.setOnClickListener {
+            binding.fontStyleScroll.visibility =
+                if (binding.fontStyleScroll.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+
+            // Always hide color scroll and bg color scroll when showing font style
+            if (binding.fontStyleScroll.visibility == View.VISIBLE) {
+                binding.colorScroll.visibility = View.GONE
+                binding.bgcolorScroll.visibility = View.GONE
+            }
         }
 
 
-        binding.stylefont.setOnClickListener {
-            binding.fontStyleScroll.visibility = View.VISIBLE
-            binding.colorScroll.visibility = View.GONE
+
+        binding.imgColorWheel.setOnClickListener {
+            binding.colorScroll.visibility =
+                if (binding.colorScroll.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+
+            // Always hide font style when showing colorScroll
+            if (binding.colorScroll.visibility == View.VISIBLE) {
+                binding.fontStyleScroll.visibility = View.GONE
+            }
+        }
+
+
+        binding.bgcolorwheel.setOnClickListener {
+
+            binding.bgcolorScroll.visibility =
+                if (binding.bgcolorScroll.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+
+            // Populate colors if empty
+            if (binding.bgcolorContainer.childCount == 0) {
+                populateBackgroundColorOptions()
+            }
+
+        }
+
+
+        binding.bgGallary.setOnClickListener {
+            UnsplashBottomSheet().show(supportFragmentManager, "UnsplashSheet")
         }
 
 
@@ -155,13 +196,6 @@ class EditThemeActivity : AppCompatActivity() {
         val fontStyleContainer = binding.fontStyleContainer
         val txtCenter = binding.txtdefault
 
-        val widthPx = TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP, 80f, resources.displayMetrics
-        ).toInt()
-
-        val heightPx = TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP, 40f, resources.displayMetrics
-        ).toInt()
 
         fontStyleContainer.removeAllViews()
 
@@ -173,10 +207,11 @@ class EditThemeActivity : AppCompatActivity() {
                 gravity = Gravity.CENTER
                 typeface = Typeface.create(fontName, Typeface.NORMAL)
 
-                layoutParams = LinearLayout.LayoutParams(widthPx, heightPx).apply {
+                layoutParams = LinearLayout.LayoutParams( LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT).apply {
                     setMargins(12, 4, 12, 4)
+                    setPadding(15,0,15,0)
                 }
-
                 // Apply the same circle background as the color picker
                 background = ContextCompat.getDrawable(this@EditThemeActivity, R.drawable.fontstyle_bg)
 
@@ -189,6 +224,7 @@ class EditThemeActivity : AppCompatActivity() {
             fontStyleContainer.addView(fontCircle)
         }
     }
+
 
     private fun populateColorOptions() {
         val colorOptions = listOf(
@@ -215,7 +251,7 @@ class EditThemeActivity : AppCompatActivity() {
 
             val colorView = View(this).apply {
                 layoutParams = LinearLayout.LayoutParams(widthPx, heightPx).apply {
-                    setMargins(12, 4, 12, 4)
+                    setMargins(0, 4, 12, 4)
                 }
                 background = drawable
 
@@ -225,6 +261,45 @@ class EditThemeActivity : AppCompatActivity() {
             }
 
             colorContainer.addView(colorView)
+        }
+    }
+
+    private fun populateBackgroundColorOptions() {
+        val colorOptions = listOf(
+            "#FFFFFF", "#000000", "#FF0000", "#00FF00", "#0000FF",
+            "#FFFF00", "#FF00FF", "#00FFFF", "#FFA500", "#A52A2A"
+        )
+
+        val bgcolorContainer = binding.bgcolorContainer  // your LinearLayout inside HorizontalScrollView
+        val backgroundLayout = binding.main            // layout whose background will change
+
+        val widthPx = TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP, 30f, resources.displayMetrics
+        ).toInt()
+
+        val heightPx = TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP, 30f, resources.displayMetrics
+        ).toInt()
+
+        bgcolorContainer.removeAllViews()
+
+        colorOptions.forEach { hex ->
+            val drawable = ContextCompat.getDrawable(this, R.drawable.circle_bg)?.mutate()
+            drawable?.setTint(Color.parseColor(hex))
+
+            val colorView = View(this).apply {
+                layoutParams = LinearLayout.LayoutParams(widthPx, heightPx).apply {
+                    setMargins(12, 4, 12, 4)
+                }
+                background = drawable
+
+                setOnClickListener {
+                    backgroundLayout.setBackgroundColor(Color.parseColor(hex)) // ✅ Set background
+                                // ✅ Hide color picker
+                }
+            }
+
+            bgcolorContainer.addView(colorView)
         }
     }
 
