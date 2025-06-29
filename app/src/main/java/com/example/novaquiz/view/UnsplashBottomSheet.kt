@@ -13,6 +13,8 @@ import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.novaquiz.R
 import com.example.novaquiz.adapter.UnsplashAdapter
 import com.example.novaquiz.databinding.FragmentUnsplashBinding
@@ -32,7 +34,15 @@ class UnsplashBottomSheet : BottomSheetDialogFragment() {
 
     private val CLIENT_ID = "eN3XunRd_cl-tYES_IJLhm5_pQMlGc3QxWWWgOSGLIE"  // Replace with your Unsplash API key
 
+    interface OnPhotoSelectedListener {
+        fun onPhotoSelected(photoUrl: String)
+    }
 
+    private var listener: OnPhotoSelectedListener? = null
+
+    fun setOnPhotoSelectedListener(callback: OnPhotoSelectedListener) {
+        this.listener = callback
+    }
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentUnsplashBinding.inflate(inflater, container, false)
         return binding.root
@@ -43,10 +53,10 @@ class UnsplashBottomSheet : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        photoAdapter = UnsplashAdapter()
-
-
-
+        photoAdapter = UnsplashAdapter { selectedPhoto ->
+            listener?.onPhotoSelected(selectedPhoto.urls.full)  // pass selected image URL
+            dismiss()  // dismiss after callback
+        }
 
         binding.recyclerView.apply {
             adapter = photoAdapter
@@ -89,11 +99,26 @@ class UnsplashBottomSheet : BottomSheetDialogFragment() {
             try {
                 val photos = RetrofitInstance.api.getPhotos(clientId = CLIENT_ID)
                 photoAdapter.submitList(photos)
-                Log.d("UnsplashBottomSheet", "Fetched ${photos.size} photos")
+
+                // Preload images for better caching
+                photos.forEach { photo ->
+                    Glide.with(requireContext())
+                        .load(photo.urls.small)
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .preload()
+
+                    Glide.with(requireContext())
+                        .load(photo.urls.regular)
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .preload()
+
+
+                }
+
+
             } catch (e: CancellationException) {
-                // Ignore cancel
+                // Ignore cancellation
             } catch (e: Exception) {
-                Log.e("UnsplashBottomSheet", "Error fetching photos: ${e.message}", e)
                 Toast.makeText(requireContext(), "Failed to load photos", Toast.LENGTH_SHORT).show()
             } finally {
                 showLoading(false)
@@ -106,14 +131,25 @@ class UnsplashBottomSheet : BottomSheetDialogFragment() {
         showLoading(true)
         lifecycleScope.launch {
             try {
-                val response: UnsplashSearchResponse = RetrofitInstance.api.searchPhotos(
-                    clientId = CLIENT_ID,
-                    query = query
-                )
+                val response: UnsplashSearchResponse = RetrofitInstance.api.searchPhotos(clientId = CLIENT_ID, query = query)
                 photoAdapter.submitList(response.results)
-                Log.d("UnsplashBottomSheet", "Search results for '$query': ${response.results.size}")
+
+                // Preload searched photos too
+                response.results.forEach { photo ->
+                    Glide.with(requireContext())
+                        .load(photo.urls.small)
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .preload()
+
+                    Glide.with(requireContext())
+                        .load(photo.urls.regular)
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .preload()
+
+
+                }
+
             } catch (e: Exception) {
-                Log.e("UnsplashBottomSheet", "Error searching photos: ${e.message}", e)
                 Toast.makeText(requireContext(), "Failed to search photos", Toast.LENGTH_SHORT).show()
             } finally {
                 showLoading(false)

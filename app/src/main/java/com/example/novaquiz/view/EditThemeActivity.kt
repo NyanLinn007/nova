@@ -14,6 +14,8 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.novaquiz.R
 import com.example.novaquiz.databinding.ActivityEditThemeBinding
 
@@ -183,16 +185,25 @@ class EditThemeActivity : AppCompatActivity() {
         }
 
         binding.bgGallary.setOnClickListener {
-
             if (binding.bgcolorScroll.visibility == View.VISIBLE) {
                 binding.bgcolorScroll.visibility = View.GONE
             }
 
-            // Show the Unsplash image picker
-            UnsplashBottomSheet().show(supportFragmentManager, "UnsplashSheet")
+            val unsplashSheet = UnsplashBottomSheet()
+            unsplashSheet.setOnPhotoSelectedListener(object : UnsplashBottomSheet.OnPhotoSelectedListener {
+                override fun onPhotoSelected(photoUrl: String) {
+                    Glide.with(this@EditThemeActivity)
+                        .load(photoUrl)
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)  // Cache the image
+                        .thumbnail(0.1f)  // Show thumbnail while loading full image
+                        .into(binding.backgroundImage)
+                }
+            })
+            unsplashSheet.show(supportFragmentManager, "UnsplashSheet")
         }
-
     }
+
+
 
     private fun populateFontStyles() {
         val fontStyleContainer = binding.fontStyleContainer
