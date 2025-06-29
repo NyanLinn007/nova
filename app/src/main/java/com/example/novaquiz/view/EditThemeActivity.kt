@@ -173,22 +173,24 @@ class EditThemeActivity : AppCompatActivity() {
 
 
         binding.bgcolorwheel.setOnClickListener {
-
             binding.bgcolorScroll.visibility =
                 if (binding.bgcolorScroll.visibility == View.VISIBLE) View.GONE else View.VISIBLE
 
-            // Populate colors if empty
+
             if (binding.bgcolorContainer.childCount == 0) {
                 populateBackgroundColorOptions()
             }
-
         }
-
 
         binding.bgGallary.setOnClickListener {
+
+            if (binding.bgcolorScroll.visibility == View.VISIBLE) {
+                binding.bgcolorScroll.visibility = View.GONE
+            }
+
+            // Show the Unsplash image picker
             UnsplashBottomSheet().show(supportFragmentManager, "UnsplashSheet")
         }
-
 
     }
 
