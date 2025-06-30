@@ -11,6 +11,8 @@
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
         android:contentDescription="Background Image"
+        android:background="@android:color/transparent"
+
         android:src="@drawable/cloudy" />
 
     <!-- Your main content layout -->
@@ -18,7 +20,6 @@
         android:id="@+id/main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@android:color/transparent"
         tools:context=".view.EditThemeActivity">
 
         <!-- Close Button -->
@@ -35,6 +36,23 @@
         <!-- Centered Quote Text -->
 
         <!-- Text Edit Panel -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/donebutton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Done"
+            android:textColor="#000000"
+            android:textSize="16sp"
+            android:layout_marginEnd="16dp"
+            android:backgroundTint="#FFFFFF"
+            android:elevation="4dp"
+            android:paddingHorizontal="24dp"
+            android:paddingVertical="8dp"
+            app:layout_constraintBottom_toBottomOf="@id/btnClose"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/btnClose" />
+
+
         <EditText
             android:id="@+id/txtdefault"
             android:layout_width="wrap_content"

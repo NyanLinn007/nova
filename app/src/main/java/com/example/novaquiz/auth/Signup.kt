@@ -80,6 +80,8 @@ class Signup : AppCompatActivity() {
 
         Log.d("RegisterDebug", "Trying to register with: $email")
 
+
+
         auth.createUserWithEmailAndPassword(email.trim(), pass).addOnCompleteListener { task ->
 
             binding.btnSignup.isEnabled = true
@@ -89,7 +91,7 @@ class Signup : AppCompatActivity() {
                 val userMap = hashMapOf(
                     "name" to name,
                     "email" to email.trim(),
-                    "themeColors" to listOf("#FFFFFF", "#000000"),
+                    "themeColors" to "#FFFFFF",
                     "themeByUrl" to "",
                     "fontSize" to 20,
                     "fontAlign" to "center",

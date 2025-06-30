@@ -2,6 +2,7 @@ package com.example.novaquiz.view
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
@@ -41,16 +42,31 @@ class MainActivity : AppCompatActivity() {
         val fontAlign = shp.getString("fontAlign", "center") ?: "center"
         val fontStyle = shp.getString("fontStyle", "normal") ?: "normal"
         val themeUrl = shp.getString("themeByUrl", "") ?: ""
+        val bgColor = shp.getString("themeColor", null) // NEW ✅
 
-        if (themeUrl.isNotEmpty()) {
+        if (!themeUrl.isNullOrEmpty()) {
+            // ✅ Use the themeUrl (image background)
             Glide.with(this)
                 .load(themeUrl)
                 .placeholder(R.drawable.cloudy)
                 .error(R.drawable.cloudy)
                 .into(binding.backgroundImage)
+
+            // ✅ Do NOT override background color at all
+        } else if (!bgColor.isNullOrEmpty()) {
+            // ✅ Use solid background color (no image)
+            try {
+                binding.main.setBackgroundColor(Color.parseColor(bgColor))
+                binding.backgroundImage.setImageResource(0) // Clear image background
+            } catch (e: Exception) {
+                Log.e("ThemeColor", "Invalid color code: $bgColor")
+            }
         } else {
+            // ✅ Neither color nor image is set, use default fallback image
             binding.backgroundImage.setImageResource(R.drawable.cloudy)
         }
+
+
 
 
         adapter=QuoteAdapter(quoteList, fontsize,fontColor,fontAlign,fontStyle)

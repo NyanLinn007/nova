@@ -2,7 +2,6 @@ package com.example.novaquiz.view
 
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
@@ -12,7 +11,6 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.novaquiz.R
@@ -54,8 +52,8 @@ class UnsplashBottomSheet : BottomSheetDialogFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         photoAdapter = UnsplashAdapter { selectedPhoto ->
-            listener?.onPhotoSelected(selectedPhoto.urls.full)  // pass selected image URL
-            dismiss()  // dismiss after callback
+            listener?.onPhotoSelected(selectedPhoto.urls.regular)
+            dismiss()
         }
 
         binding.recyclerView.apply {

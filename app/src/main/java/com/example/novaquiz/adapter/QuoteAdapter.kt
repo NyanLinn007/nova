@@ -44,8 +44,9 @@ class QuoteAdapter( private var quotes: List<Quote>,
        var quote =quotes[position]
         holder.tvText.text=quote.text
         holder.tvReference.text=quote.reference
-        holder.tvText.textSize=fontsize
-        holder.tvReference.textSize = fontsize * 0.8f
+        holder.tvText.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, fontsize)
+        holder.tvReference.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, fontsize * 0.8f)
+
         try {
             val parsedColor = Color.parseColor(fontColor)
             holder.tvText.setTextColor(parsedColor)

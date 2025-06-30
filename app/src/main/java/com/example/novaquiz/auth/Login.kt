@@ -93,9 +93,10 @@ class Login : AppCompatActivity() {
                                 editor.putString("themeByUrl", document.getString("themeByUrl") ?: "")
                                 editor.putFloat("fontSize", (document.getLong("fontSize") ?: 20L).toFloat())
 
-                                // If themeColors is an array
-                                val themeColors = document.get("themeColors") as? List<*>
-                                editor.putString("themeColors", themeColors?.joinToString(",") ?: "")
+                                // When loading from Firestore document
+                                val themeColor = document.getString("themeColor") ?: ""
+                                editor.putString("themeColor", themeColor)
+
 
                                 editor.apply()
 
