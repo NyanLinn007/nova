@@ -4,6 +4,7 @@ package com.example.novaquiz.adapter
 
 import android.graphics.Color
 import android.graphics.Typeface
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -56,14 +57,25 @@ class QuoteAdapter( private var quotes: List<Quote>,
             holder.tvReference.setTextColor(Color.GRAY)
         }
 
-        val alignment = when (fontAlign) {
-            "center" -> View.TEXT_ALIGNMENT_CENTER
-            "start" -> View.TEXT_ALIGNMENT_TEXT_START
-            "end" -> View.TEXT_ALIGNMENT_TEXT_END
+        val align = fontAlign.lowercase()
+        val gravity = when (align) {
+            "start" -> Gravity.START
+            "end" -> Gravity.END
+            else -> Gravity.CENTER
+        }
+        val textAlignment = when (align) {
+            "start" -> View.TEXT_ALIGNMENT_VIEW_START
+            "end" -> View.TEXT_ALIGNMENT_VIEW_END
             else -> View.TEXT_ALIGNMENT_CENTER
         }
-        holder.tvText.textAlignment = alignment
-        holder.tvReference.textAlignment = alignment
+
+// Apply to tvText
+        holder.tvText.gravity = gravity
+        holder.tvText.textAlignment = textAlignment
+
+// Apply to tvReference
+        holder.tvReference.gravity = gravity
+        holder.tvReference.textAlignment = textAlignment
 
         val style = when (fontStyle.lowercase()) {
             "bold" -> Typeface.BOLD

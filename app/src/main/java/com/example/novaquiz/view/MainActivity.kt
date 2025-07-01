@@ -44,6 +44,7 @@ class MainActivity : AppCompatActivity() {
         val themeUrl = shp.getString("themeByUrl", "") ?: ""
         val bgColor = shp.getString("themeColor", null) // NEW ✅
 
+
         if (!themeUrl.isNullOrEmpty()) {
             // ✅ Use the themeUrl (image background)
             Glide.with(this)

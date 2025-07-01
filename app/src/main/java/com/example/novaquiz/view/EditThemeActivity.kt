@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.Typeface
+import android.graphics.text.LineBreaker
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
@@ -32,6 +34,7 @@ class EditThemeActivity : AppCompatActivity() {
     private var selectedBackgroundColorHex: String? = null
     private var selectedBgColor: String? = null
     private var selectedThemeType: ThemeType = ThemeType.NONE  // ✅ default is URL
+    private var currentAlign = "center"
     enum class ThemeType {
         URL, COLOR, NONE
     }
@@ -62,18 +65,9 @@ class EditThemeActivity : AppCompatActivity() {
         val savedFontColor = sharedPrefs.getString("fontColor", "#FFFFFF") ?: "#FFFFFF"
         binding.txtdefault.setTextColor(Color.parseColor(savedFontColor))
 
-        val savedAlign = sharedPrefs.getString("fontAlign", "center") ?: "center"
-        binding.txtdefault.gravity = when (savedAlign) {
-            "start" -> Gravity.START or Gravity.CENTER_VERTICAL
-            "end" -> Gravity.END or Gravity.CENTER_VERTICAL
-            else -> Gravity.CENTER
-        }
-        when (savedAlign) {
-            "start" -> binding.imgAlignToggle.setImageResource(R.drawable.left_menu)
-            "end" -> binding.imgAlignToggle.setImageResource(R.drawable.right_menu)
-            else -> binding.imgAlignToggle.setImageResource(R.drawable.menu)
-        }
+        currentAlign = sharedPrefs.getString("fontAlign", "center") ?: "center"
 
+        applyAlignment(currentAlign)
         val savedFontStyle = sharedPrefs.getString("fontStyle", "normal") ?: "normal"
         binding.txtdefault.setTypeface(
             null,
@@ -176,34 +170,29 @@ class EditThemeActivity : AppCompatActivity() {
         }
 
 
-        binding.txtdefault.gravity = Gravity.CENTER
-
-        var currentAlign = "center"
-
         binding.imgAlignToggle.setOnClickListener {
-            when (currentAlign) {
+            currentAlign = when (currentAlign) {
                 "center" -> {
-                    currentAlign = "start"
-                    binding.txtdefault.gravity = Gravity.START or Gravity.CENTER_VERTICAL
-                    binding.imgAlignToggle.setImageResource(R.drawable.left_menu)
+                    applyAlignment("start")
+                    "start"
                 }
-
                 "start" -> {
-                    currentAlign = "end"
-                    binding.txtdefault.gravity = Gravity.END or Gravity.CENTER_VERTICAL
-                    binding.imgAlignToggle.setImageResource(R.drawable.right_menu)
+                    applyAlignment("end")
+                    "end"
                 }
-
                 "end" -> {
-                    currentAlign = "center"
-                    binding.txtdefault.gravity = Gravity.CENTER
-                    binding.imgAlignToggle.setImageResource(R.drawable.menu)
-
+                    applyAlignment("justify")
+                    "justify"
+                }
+                else -> { // justify or unknown
+                    applyAlignment("center")
+                    "center"
                 }
             }
             binding.colorScroll.visibility = View.GONE
             binding.fontStyleScroll.visibility = View.GONE
         }
+
 
         populateFontStyles()
         populateColorOptions()
@@ -306,17 +295,16 @@ class EditThemeActivity : AppCompatActivity() {
 
             val db = FirebaseFirestore.getInstance()
 
-            // Prepare data to save locally & remotely
+
             val scaledDensity = resources.displayMetrics.scaledDensity
             val fontSizeSp = binding.txtdefault.textSize / scaledDensity
             val fontColorInt = binding.txtdefault.currentTextColor
             val fontColorHex = String.format("#%06X", 0xFFFFFF and fontColorInt)
-            val gravity = binding.txtdefault.gravity and Gravity.HORIZONTAL_GRAVITY_MASK
-            val align = when (gravity) {
-                Gravity.START -> "start"
-                Gravity.END -> "end"
-                else -> "center"
-            }
+
+            val align = currentAlign
+            Log.d("TextAlign", "Current alignment is: $align")
+
+
             val isBold = binding.txtdefault.typeface.isBold
             val fontStyle = if (isBold) "bold" else "normal"
 
@@ -349,9 +337,6 @@ class EditThemeActivity : AppCompatActivity() {
                     } else if (selectedThemeType == ThemeType.URL) {
                         editor.putString("themeByUrl", selectedPhotoUrl)
                         editor.putString("themeColor", "")
-                    } else {
-                        editor.putString("themeByUrl", "")
-                        editor.putString("themeColor", "")
                     }
 
                     editor.apply()
@@ -371,7 +356,40 @@ class EditThemeActivity : AppCompatActivity() {
                 }
         }
     }
-
+    private fun applyAlignment(align: String) {
+        currentAlign = align
+        when (align) {
+            "start" -> {
+                binding.txtdefault.gravity = Gravity.START or Gravity.CENTER_VERTICAL
+                binding.imgAlignToggle.setImageResource(R.drawable.left_menu)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    binding.txtdefault.justificationMode = LineBreaker.JUSTIFICATION_MODE_NONE
+                }
+            }
+            "end" -> {
+                binding.txtdefault.gravity = Gravity.END or Gravity.CENTER_VERTICAL
+                binding.imgAlignToggle.setImageResource(R.drawable.right_menu)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    binding.txtdefault.justificationMode = LineBreaker.JUSTIFICATION_MODE_NONE
+                }
+            }
+            "justify" -> {
+                // Justification supported only on API 26+
+                binding.txtdefault.gravity = Gravity.START or Gravity.CENTER_VERTICAL
+                binding.imgAlignToggle.setImageResource(R.drawable.menu) // <-- Your justify icon here
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    binding.txtdefault.justificationMode = LineBreaker.JUSTIFICATION_MODE_INTER_WORD
+                }
+            }
+            else -> { // center
+                binding.txtdefault.gravity = Gravity.CENTER
+                binding.imgAlignToggle.setImageResource(R.drawable.menu)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    binding.txtdefault.justificationMode = LineBreaker.JUSTIFICATION_MODE_NONE
+                }
+            }
+        }
+    }
 
 
 
