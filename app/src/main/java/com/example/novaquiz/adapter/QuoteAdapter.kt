@@ -22,6 +22,7 @@ class QuoteAdapter( private var quotes: List<Quote>,
                     private val fontColor: String,
                     private val fontAlign: String,
                     private val fontStyle: String,
+                    private val fontFamily: String
 
 
 ):RecyclerView.Adapter<QuoteAdapter.QuoteViewHolder>(){
@@ -82,8 +83,8 @@ class QuoteAdapter( private var quotes: List<Quote>,
             "italic" -> Typeface.ITALIC
             else -> Typeface.NORMAL
         }
-        holder.tvText.setTypeface(null, style)
-        holder.tvReference.setTypeface(null, style)
+        holder.tvText.typeface = Typeface.create(fontFamily, style)
+        holder.tvReference.typeface = Typeface.create(fontFamily, style)
 
         val scale = holder.itemView.resources.displayMetrics.density
         val sizePx = (fontsize * 3 * scale).toInt()

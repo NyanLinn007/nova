@@ -35,6 +35,7 @@ class EditThemeActivity : AppCompatActivity() {
     private var selectedBgColor: String? = null
     private var selectedThemeType: ThemeType = ThemeType.NONE  // ✅ default is URL
     private var currentAlign = "center"
+    private var selectedFontFamily: String? = null
     enum class ThemeType {
         URL, COLOR, NONE
     }
@@ -69,10 +70,10 @@ class EditThemeActivity : AppCompatActivity() {
 
         applyAlignment(currentAlign)
         val savedFontStyle = sharedPrefs.getString("fontStyle", "normal") ?: "normal"
-        binding.txtdefault.setTypeface(
-            null,
-            if (savedFontStyle == "bold") Typeface.BOLD else Typeface.NORMAL
-        )
+        selectedFontFamily = sharedPrefs.getString("fontFamily", "sans-serif") ?: "sans-serif"
+
+        binding.txtdefault.typeface = Typeface.create(selectedFontFamily, if (savedFontStyle == "bold") Typeface.BOLD else Typeface.NORMAL)
+
         binding.tvStyleToggle.setTypeface(
             null,
             if (savedFontStyle == "bold") Typeface.BOLD else Typeface.NORMAL
@@ -285,76 +286,109 @@ class EditThemeActivity : AppCompatActivity() {
             })
             unsplashSheet.show(supportFragmentManager, "UnsplashSheet")
         }
-
         binding.donebutton.setOnClickListener {
-            val userId = FirebaseAuth.getInstance().currentUser?.uid
-            if (userId == null) {
-                Toast.makeText(this, "User not logged in", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
+            try {
+                Log.d("ThemeSave", "Save button clicked")
 
-            val db = FirebaseFirestore.getInstance()
+                val userId = FirebaseAuth.getInstance().currentUser?.uid
+                if (userId == null) {
+                    Log.e("ThemeSave", "User not logged in")
+                    Toast.makeText(this, "User not logged in", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
 
+                Log.d("ThemeSave", "User ID: $userId")
 
-            val scaledDensity = resources.displayMetrics.scaledDensity
-            val fontSizeSp = binding.txtdefault.textSize / scaledDensity
-            val fontColorInt = binding.txtdefault.currentTextColor
-            val fontColorHex = String.format("#%06X", 0xFFFFFF and fontColorInt)
-
-            val align = currentAlign
-            Log.d("TextAlign", "Current alignment is: $align")
+                val fontFamily = selectedFontFamily ?: "sans-serif"
 
 
-            val isBold = binding.txtdefault.typeface.isBold
-            val fontStyle = if (isBold) "bold" else "normal"
 
-            // Theme data for Firestore
-            val themeData = hashMapOf(
-                "fontSize" to fontSizeSp,
-                "fontColor" to fontColorHex,
-                "fontAlign" to align,
-                "fontStyle" to fontStyle,
-                "themeColor" to if (selectedThemeType == ThemeType.COLOR) selectedBgColor else "",
-                "themeByUrl" to if (selectedThemeType == ThemeType.URL) selectedPhotoUrl.orEmpty() else ""
-            )
 
-            // Save to Firestore first
-            db.collection("Users").document(userId)
-                .update(themeData as Map<String, Any>)
-                .addOnSuccessListener {
-                    // On success, save to SharedPreferences
-                    val sharedPrefs = getSharedPreferences("UserData", Context.MODE_PRIVATE)
-                    val editor = sharedPrefs.edit()
+                val sharedPrefs = getSharedPreferences("UserData", Context.MODE_PRIVATE)
+                val savedFontSize = sharedPrefs.getFloat("fontSize", -1f)
+                val savedFontColor = sharedPrefs.getString("fontColor", "") ?: ""
+                val savedAlign = sharedPrefs.getString("fontAlign", "") ?: ""
+                val savedStyle = sharedPrefs.getString("fontStyle", "") ?: ""
+                val savedColor = sharedPrefs.getString("themeColor", "") ?: ""
+                val savedUrl = sharedPrefs.getString("themeByUrl", "") ?: ""
 
-                    editor.putFloat("fontSize", fontSizeSp)
-                    editor.putString("fontColor", fontColorHex)
-                    editor.putString("fontAlign", align)
-                    editor.putString("fontStyle", fontStyle)
+                val scaledDensity = resources.displayMetrics.scaledDensity
+                val fontSizeSp = binding.txtdefault.textSize / scaledDensity
+                val fontColorInt = binding.txtdefault.currentTextColor
+                val fontColorHex = String.format("#%06X", 0xFFFFFF and fontColorInt)
 
-                    if (selectedThemeType == ThemeType.COLOR) {
-                        editor.putString("themeColor", selectedBgColor)
-                        editor.putString("themeByUrl", "")
-                    } else if (selectedThemeType == ThemeType.URL) {
-                        editor.putString("themeByUrl", selectedPhotoUrl)
-                        editor.putString("themeColor", "")
+                val align = currentAlign
+                val isBold = binding.txtdefault.typeface?.isBold ?: false
+                val fontStyle = if (isBold) "bold" else "normal"
+
+                // ✅ Fallback to saved value if user didn’t select new theme color or URL
+                val themeColor = if (selectedThemeType == ThemeType.COLOR && !selectedBgColor.isNullOrBlank())
+                    selectedBgColor!! else savedColor
+
+                val themeByUrl = if (selectedThemeType == ThemeType.URL && !selectedPhotoUrl.isNullOrBlank())
+                    selectedPhotoUrl!! else savedUrl
+
+                Log.d("ThemeSave", "Current values -> FontSize: $fontSizeSp, FontColor: $fontColorHex, Align: $align, Style: $fontStyle, ThemeColor: $themeColor, ThemeURL: $themeByUrl")
+
+                val themeData = mutableMapOf<String, Any>()
+                if (fontSizeSp != savedFontSize) themeData["fontSize"] = fontSizeSp
+                if (fontColorHex != savedFontColor) themeData["fontColor"] = fontColorHex
+                if (align != savedAlign) themeData["fontAlign"] = align
+                if (fontStyle != savedStyle) themeData["fontStyle"] = fontStyle
+                if (themeColor != savedColor) themeData["themeColor"] = themeColor
+                if (themeByUrl != savedUrl) themeData["themeByUrl"] = themeByUrl
+                if (fontFamily != sharedPrefs.getString("fontFamily", "sans-serif")) {
+                    themeData["fontFamily"] = fontFamily
+                }
+
+
+
+                if (themeData.isEmpty()) {
+                    Log.d("ThemeSave", "No changes detected. Skipping Firestore update.")
+                    Toast.makeText(this, "No changes made", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+
+                Log.d("ThemeSave", "Changed fields to update in Firestore: $themeData")
+
+                val db = FirebaseFirestore.getInstance()
+                db.collection("Users").document(userId)
+                    .update(themeData)
+                    .addOnSuccessListener {
+                        Log.d("ThemeSave", "Firestore update successful")
+
+                        val editor = sharedPrefs.edit()
+                        editor.putFloat("fontSize", fontSizeSp)
+                        editor.putString("fontColor", fontColorHex)
+                        editor.putString("fontAlign", align)
+                        editor.putString("fontStyle", fontStyle)
+                        editor.putString("themeColor", themeColor)
+                        editor.putString("themeByUrl", themeByUrl)
+                        editor.putString("fontFamily", fontFamily)
+                        editor.apply()
+
+                        Log.d("ThemeSave", "SharedPreferences updated")
+                        Toast.makeText(this, "Theme saved successfully", Toast.LENGTH_SHORT).show()
+
+                        val intent = Intent(this, MainActivity::class.java)
+                        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+                        startActivity(intent)
+                        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+                        finish()
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("ThemeSave", "Failed to save theme to Firestore: ${e.message}", e)
+                        Toast.makeText(this, "Failed to save theme: ${e.message}", Toast.LENGTH_LONG).show()
                     }
 
-                    editor.apply()
-
-                    Toast.makeText(this, "Theme saved successfully", Toast.LENGTH_SHORT).show()
-
-                    // Navigate back
-                    val intent = Intent(this, MainActivity::class.java)
-                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
-                    startActivity(intent)
-                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
-                    finish()
-                }
-                .addOnFailureListener { e ->
-                    Toast.makeText(this, "Failed to save theme: ${e.message}", Toast.LENGTH_LONG)
-                        .show()
-                }
+            } catch (e: Exception) {
+                Log.e("ThemeSave", "Unexpected error: ${e.message}", e)
+                Toast.makeText(this, "Unexpected error: ${e.message}", Toast.LENGTH_LONG).show()
+            }
         }
+
+
+
     }
     private fun applyAlignment(align: String) {
         currentAlign = align
@@ -383,7 +417,7 @@ class EditThemeActivity : AppCompatActivity() {
             }
             else -> { // center
                 binding.txtdefault.gravity = Gravity.CENTER
-                binding.imgAlignToggle.setImageResource(R.drawable.menu)
+                binding.imgAlignToggle.setImageResource(R.drawable.center_align)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     binding.txtdefault.justificationMode = LineBreaker.JUSTIFICATION_MODE_NONE
                 }
@@ -418,7 +452,7 @@ class EditThemeActivity : AppCompatActivity() {
 
                 setOnClickListener {
                     txtCenter.typeface = Typeface.create(fontName, Typeface.NORMAL)
-
+                    selectedFontFamily = fontName // Save the selected font family
                 }
             }
 

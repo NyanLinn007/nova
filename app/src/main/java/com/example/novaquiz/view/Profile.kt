@@ -1,8 +1,12 @@
 package com.example.novaquiz.view
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -63,6 +67,12 @@ class Profile : AppCompatActivity() {
             startActivity(intent)
             overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
             finish()
+        }
+        binding.btnCopyUserId.setOnClickListener {
+            val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = ClipData.newPlainText("User ID", binding.txtUserId.text.toString())
+            clipboard.setPrimaryClip(clip)
+            Toast.makeText(this, "User ID copied to clipboard", Toast.LENGTH_SHORT).show()
         }
 
     }
