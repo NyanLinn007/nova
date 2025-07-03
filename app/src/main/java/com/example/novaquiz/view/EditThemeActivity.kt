@@ -2,8 +2,10 @@ package com.example.novaquiz.view
 
 import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.Typeface
+import android.graphics.fonts.FontStyle
 import android.graphics.text.LineBreaker
 import android.os.Build
 import android.os.Bundle
@@ -16,7 +18,9 @@ import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.ui.text.font.ResourceFont
 import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
@@ -36,20 +40,35 @@ class EditThemeActivity : AppCompatActivity() {
     private var selectedThemeType: ThemeType = ThemeType.NONE  // ✅ default is URL
     private var currentAlign = "center"
     private var selectedFontFamily: String? = null
+    private var  selectedFontFamilyResId :String? = null
     enum class ThemeType {
         URL, COLOR, NONE
     }
 
 
-
     private val fontStyles = listOf(
-        "sans-serif",       // Android default Roboto
-        "serif",            // Times New Roman like
+        R.font.kt02,
+        R.font.kt03,
+        R.font.mm3h,
+        R.font.cherry,
+        R.font.jasmine,
+        R.font.myanmarblack,
+        R.font.myanmarangoun,
+        R.font.myanmargantgaw,
+        R.font.myanmarkuttar,
+        R.font.myanmarnayone,
+        R.font.myanmarnjaubn,
+        R.font.myanmarpaonone,
+        R.font.myanmarpixel,
+        "sans-serif",
+        "serif",
         "monospace",
         "casual",
         "cursive",
         "sans-serif-condensed"
     )
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,9 +89,22 @@ class EditThemeActivity : AppCompatActivity() {
 
         applyAlignment(currentAlign)
         val savedFontStyle = sharedPrefs.getString("fontStyle", "normal") ?: "normal"
-        selectedFontFamily = sharedPrefs.getString("fontFamily", "sans-serif") ?: "sans-serif"
+        val fontFamilyFromPrefs = sharedPrefs.getString("fontFamily", "sans-serif") ?: "sans-serif"
 
-        binding.txtdefault.typeface = Typeface.create(selectedFontFamily, if (savedFontStyle == "bold") Typeface.BOLD else Typeface.NORMAL)
+        val typefaceToApply: Typeface? = try {
+            // Try parse fontFamilyFromPrefs as Int (resource ID)
+            val resId = fontFamilyFromPrefs.toIntOrNull()
+            if (resId != null) {
+                ResourcesCompat.getFont(this, resId)
+            } else {
+                // Use system font name string
+                Typeface.create(fontFamilyFromPrefs, if (savedFontStyle == "bold") Typeface.BOLD else Typeface.NORMAL)
+            }
+        } catch (e: Exception) {
+            Typeface.create("sans-serif", if (savedFontStyle == "bold") Typeface.BOLD else Typeface.NORMAL)
+        }
+
+        binding.txtdefault.typeface = typefaceToApply ?: Typeface.DEFAULT
 
         binding.tvStyleToggle.setTypeface(
             null,
@@ -299,7 +331,7 @@ class EditThemeActivity : AppCompatActivity() {
 
                 Log.d("ThemeSave", "User ID: $userId")
 
-                val fontFamily = selectedFontFamily ?: "sans-serif"
+                val fontFamily = selectedFontFamilyResId ?: selectedFontFamily ?: "sans-serif"
 
 
 
@@ -427,38 +459,77 @@ class EditThemeActivity : AppCompatActivity() {
 
 
 
-        private fun populateFontStyles() {
+    private fun populateFontStyles() {
         val fontStyleContainer = binding.fontStyleContainer
         val txtCenter = binding.txtdefault
 
-
         fontStyleContainer.removeAllViews()
 
-        fontStyles.forEach { fontName ->
+        fontStyles.forEach { fontStyle ->
+            // Display name for UI only
+            val fontName = if (fontStyle is Int) {
+                try {
+                    resources.getResourceEntryName(fontStyle)
+                } catch (e: Resources.NotFoundException) {
+                    "UnknownFont"
+                }
+            } else {
+                fontStyle.toString()
+            }
+
             val fontCircle = TextView(this).apply {
                 text = fontName
                 setTextColor(Color.WHITE)
                 textSize = 16f
                 gravity = Gravity.CENTER
-                typeface = Typeface.create(fontName, Typeface.NORMAL)
 
-                layoutParams = LinearLayout.LayoutParams( LinearLayout.LayoutParams.WRAP_CONTENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT).apply {
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply {
                     setMargins(12, 4, 12, 4)
-                    setPadding(15,0,15,0)
                 }
-                // Apply the same circle background as the color picker
+
+                setPadding(15, 0, 15, 0)
                 background = ContextCompat.getDrawable(this@EditThemeActivity, R.drawable.fontstyle_bg)
 
+                // Preview font on button
+                typeface = when (fontStyle) {
+                    is Int -> ResourcesCompat.getFont(context, fontStyle) ?: Typeface.DEFAULT
+                    is String -> Typeface.create(fontStyle, Typeface.NORMAL) ?: Typeface.DEFAULT
+                    else -> Typeface.DEFAULT
+                }
+
                 setOnClickListener {
-                    txtCenter.typeface = Typeface.create(fontName, Typeface.NORMAL)
-                    selectedFontFamily = fontName // Save the selected font family
+                    val selectedTypeface = when (fontStyle) {
+                        is Int -> ResourcesCompat.getFont(context, fontStyle) ?: Typeface.DEFAULT
+                        is String -> Typeface.create(fontStyle, Typeface.NORMAL) ?: Typeface.DEFAULT
+                        else -> Typeface.DEFAULT
+                    }
+
+                    txtCenter.typeface = selectedTypeface
+
+                    // 🟢 Save BOTH type and value
+                    if (fontStyle is Int) {
+                         selectedFontFamilyResId = fontStyle.toString()
+                        selectedFontFamily = null // clear string
+                        Log.d("fontName", "Selected resource font ID: $selectedFontFamilyResId")
+                    } else if (fontStyle is String) {
+                        selectedFontFamily = fontStyle
+                        var selectedFontFamilyResId = null // clear resId
+                        Log.d("fontName", "Selected system font name: $selectedFontFamily")
+                    }
                 }
             }
 
             fontStyleContainer.addView(fontCircle)
         }
     }
+
+
+
+
+
 
 
     private fun populateColorOptions() {
@@ -541,6 +612,9 @@ class EditThemeActivity : AppCompatActivity() {
             bgcolorContainer.addView(colorView)
         }
     }
+
+
+
 
 
     private fun navigateBackToMain() {

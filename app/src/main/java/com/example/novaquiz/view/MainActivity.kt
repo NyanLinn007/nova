@@ -3,6 +3,7 @@ package com.example.novaquiz.view
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.Typeface
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
@@ -18,6 +19,7 @@ import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import com.bumptech.glide.Glide
@@ -60,7 +62,7 @@ class MainActivity : AppCompatActivity() {
         // Load YouTube Music URL once
         webViewYoutube.loadUrl("https://www.youtube.com/")
 
-        // Existing code for preferences, background, adapter setup...
+        // Load preferences
         val shp = getSharedPreferences("UserData", Context.MODE_PRIVATE)
         val fontsize = shp.getFloat("fontSize", 16f)
         val fontColor = shp.getString("fontColor", "#000000") ?: "#000000"
@@ -68,8 +70,9 @@ class MainActivity : AppCompatActivity() {
         val fontStyle = shp.getString("fontStyle", "normal") ?: "normal"
         val themeUrl = shp.getString("themeByUrl", "") ?: ""
         val bgColor = shp.getString("themeColor", null)
-        val fontFamily = shp.getString("fontFamily", "sans-serif") ?: "sans-serif"
+        val fontFamilyResIdString = shp.getString("fontFamily", null)
 
+        // Load background
         if (themeUrl.isNotEmpty()) {
             Glide.with(this)
                 .load(themeUrl)
@@ -87,10 +90,23 @@ class MainActivity : AppCompatActivity() {
             binding.backgroundImage.setImageResource(R.drawable.cloudy)
         }
 
-        adapter = QuoteAdapter(quoteList, fontsize, fontColor, fontAlign, fontStyle, fontFamily)
-        binding.rvQuote.layoutManager = LinearLayoutManager(this)
-        binding.rvQuote.adapter = adapter
+        // Convert stored font resource ID (String) to Typeface
+        val fontTypeface: Typeface = try {
+            val fontResId = fontFamilyResIdString?.toIntOrNull() ?: 0
+            if (fontResId != 0) {
+                ResourcesCompat.getFont(this, fontResId) ?: Typeface.DEFAULT
+            } else {
+                Typeface.DEFAULT
+            }
+        } catch (e: Exception) {
+            Log.e("FontLoad", "Failed to load font from ID: $fontFamilyResIdString", e)
+            Typeface.DEFAULT
+        }
+
+        // Setup RecyclerView
+        adapter = QuoteAdapter(quoteList, fontsize, fontColor, fontAlign, fontStyle, fontTypeface)
         binding.rvQuote.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        binding.rvQuote.adapter = adapter
         PagerSnapHelper().attachToRecyclerView(binding.rvQuote)
 
         showLoading(true)
@@ -101,35 +117,29 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "No internet connection. Please check your network.", Toast.LENGTH_LONG).show()
         }
 
-        // Button listeners for theme, general, profile
+        // Navigation buttons
         binding.btnTheme.setOnClickListener { vibrateAndLaunchActivity(Theme::class.java) }
         binding.btnGeneral.setOnClickListener {
-
             vibrate()
             val generalSheet = General()
             generalSheet.show(supportFragmentManager, "GeneralBottomSheet")
         }
-
-
         binding.btnProfile.setOnClickListener { vibrateAndLaunchActivity(Profile::class.java, finishAfter = false) }
 
         binding.btnmusic.setOnClickListener {
             webViewContainer.visibility = if (webViewContainer.visibility == View.VISIBLE) View.GONE else View.VISIBLE
         }
 
-        // Hide WebView container when clicking outside WebView
         webViewContainer.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_DOWN) {
                 val location = IntArray(2)
                 webViewYoutube.getLocationOnScreen(location)
                 val x = event.rawX.toInt()
                 val y = event.rawY.toInt()
-
                 val left = location[0]
                 val top = location[1]
                 val right = left + webViewYoutube.width
                 val bottom = top + webViewYoutube.height
-
                 if (x < left || x > right || y < top || y > bottom) {
                     webViewContainer.visibility = View.GONE
                     return@setOnTouchListener true
@@ -193,7 +203,6 @@ class MainActivity : AppCompatActivity() {
             }
     }
 
-
     private fun showLoading(isLoading: Boolean) {
         binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
         binding.rvQuote.visibility = if (isLoading) View.INVISIBLE else View.VISIBLE
@@ -203,7 +212,6 @@ class MainActivity : AppCompatActivity() {
         val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val network = connectivityManager.activeNetwork ?: return false
         val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
-
         return capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
                 || capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
                 || capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)

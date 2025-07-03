@@ -22,7 +22,7 @@ class QuoteAdapter( private var quotes: List<Quote>,
                     private val fontColor: String,
                     private val fontAlign: String,
                     private val fontStyle: String,
-                    private val fontFamily: String
+                    private val fontFamily: Typeface
 
 
 ):RecyclerView.Adapter<QuoteAdapter.QuoteViewHolder>(){
