@@ -28,7 +28,9 @@
             android:textColor="@color/white"
             android:gravity="center"
             android:textSize="18sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:lineSpacingExtra="6dp" />
+
 
         <TextView
             android:id="@+id/tvReference"
@@ -59,7 +61,6 @@
             android:layout_height="56dp"
             android:padding="12dp"
             android:background="@drawable/bg_favorite"
-
             android:scaleType="centerInside"
             android:src="@drawable/ic_share"
             android:contentDescription="Share" />

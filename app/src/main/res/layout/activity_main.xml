@@ -144,6 +144,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#CC000000"
+        android:layout_gravity="bottom"
         android:visibility="gone">
 
     <WebView

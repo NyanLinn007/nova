@@ -86,13 +86,13 @@ class QuoteAdapter( private var quotes: List<Quote>,
         holder.tvText.typeface = Typeface.create(fontFamily, style)
         holder.tvReference.typeface = Typeface.create(fontFamily, style)
 
-        val scale = holder.itemView.resources.displayMetrics.density
-        val sizePx = (fontsize * 3 * scale).toInt()
+//        val scale = holder.itemView.resources.displayMetrics.density
+//        val sizePx = (fontsize * 3 * scale).toInt()
 
-        holder.btnShare.layoutParams.width = sizePx
-        holder.btnShare.layoutParams.height = sizePx
-        holder.btnFavorite.layoutParams.width = sizePx
-        holder.btnFavorite.layoutParams.height = sizePx
+//        holder.btnShare.layoutParams.width = sizePx
+//        holder.btnShare.layoutParams.height = sizePx
+//        holder.btnFavorite.layoutParams.width = sizePx
+//        holder.btnFavorite.layoutParams.height = sizePx
 
         try {
             val tintColor = Color.parseColor(fontColor)

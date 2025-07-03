@@ -103,10 +103,16 @@ class MainActivity : AppCompatActivity() {
 
         // Button listeners for theme, general, profile
         binding.btnTheme.setOnClickListener { vibrateAndLaunchActivity(Theme::class.java) }
-        binding.btnGeneral.setOnClickListener { vibrateAndLaunchActivity(General::class.java) }
+        binding.btnGeneral.setOnClickListener {
+
+            vibrate()
+            val generalSheet = General()
+            generalSheet.show(supportFragmentManager, "GeneralBottomSheet")
+        }
+
+
         binding.btnProfile.setOnClickListener { vibrateAndLaunchActivity(Profile::class.java, finishAfter = false) }
 
-        // Music button toggles WebView container visibility
         binding.btnmusic.setOnClickListener {
             webViewContainer.visibility = if (webViewContainer.visibility == View.VISIBLE) View.GONE else View.VISIBLE
         }
@@ -132,7 +138,6 @@ class MainActivity : AppCompatActivity() {
             false
         }
 
-        // Override back press to close WebView if open
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 if (webViewContainer.visibility == View.VISIBLE) {
@@ -156,8 +161,18 @@ class MainActivity : AppCompatActivity() {
         if (finishAfter) finish()
     }
 
+    private fun vibrate() {
+        val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
+        } else {
+            vibrator.vibrate(50)
+        }
+    }
+
     private fun fetchQuotes() {
         db.collection("Quotes")
+            .orderBy("createdAt", com.google.firebase.firestore.Query.Direction.DESCENDING)
             .get()
             .addOnSuccessListener { result ->
                 quoteList.clear()
@@ -177,6 +192,7 @@ class MainActivity : AppCompatActivity() {
                 Log.e("MainActivity", "Firestore fetch error", exception)
             }
     }
+
 
     private fun showLoading(isLoading: Boolean) {
         binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
