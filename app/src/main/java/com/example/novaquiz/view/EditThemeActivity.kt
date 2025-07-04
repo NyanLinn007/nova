@@ -28,6 +28,7 @@ import com.example.novaquiz.R
 import com.example.novaquiz.databinding.ActivityEditThemeBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlin.math.roundToInt
 
 
 class EditThemeActivity : AppCompatActivity() {
@@ -333,9 +334,6 @@ class EditThemeActivity : AppCompatActivity() {
 
                 val fontFamily = selectedFontFamilyResId ?: selectedFontFamily ?: "sans-serif"
 
-
-
-
                 val sharedPrefs = getSharedPreferences("UserData", Context.MODE_PRIVATE)
                 val savedFontSize = sharedPrefs.getFloat("fontSize", -1f)
                 val savedFontColor = sharedPrefs.getString("fontColor", "") ?: ""
@@ -343,9 +341,12 @@ class EditThemeActivity : AppCompatActivity() {
                 val savedStyle = sharedPrefs.getString("fontStyle", "") ?: ""
                 val savedColor = sharedPrefs.getString("themeColor", "") ?: ""
                 val savedUrl = sharedPrefs.getString("themeByUrl", "") ?: ""
+                val savedFamily = sharedPrefs.getString("fontFamily", "sans-serif") ?: "sans-serif"
 
                 val scaledDensity = resources.displayMetrics.scaledDensity
-                val fontSizeSp = binding.txtdefault.textSize / scaledDensity
+                val fontSizeSp = (binding.txtdefault.textSize / scaledDensity)
+                val fontSizeRounded = fontSizeSp.roundToInt()
+
                 val fontColorInt = binding.txtdefault.currentTextColor
                 val fontColorHex = String.format("#%06X", 0xFFFFFF and fontColorInt)
 
@@ -353,27 +354,30 @@ class EditThemeActivity : AppCompatActivity() {
                 val isBold = binding.txtdefault.typeface?.isBold ?: false
                 val fontStyle = if (isBold) "bold" else "normal"
 
-                // ✅ Fallback to saved value if user didn’t select new theme color or URL
                 val themeColor = if (selectedThemeType == ThemeType.COLOR && !selectedBgColor.isNullOrBlank())
                     selectedBgColor!! else savedColor
 
                 val themeByUrl = if (selectedThemeType == ThemeType.URL && !selectedPhotoUrl.isNullOrBlank())
                     selectedPhotoUrl!! else savedUrl
 
-                Log.d("ThemeSave", "Current values -> FontSize: $fontSizeSp, FontColor: $fontColorHex, Align: $align, Style: $fontStyle, ThemeColor: $themeColor, ThemeURL: $themeByUrl")
+                Log.d("ThemeSave", "Current values -> FontSize: $fontSizeRounded, FontColor: $fontColorHex, Align: $align, Style: $fontStyle, ThemeColor: $themeColor, ThemeURL: $themeByUrl")
 
                 val themeData = mutableMapOf<String, Any>()
-                if (fontSizeSp != savedFontSize) themeData["fontSize"] = fontSizeSp
+
+                // ✅ Compare rounded int values and store as Long (Firestore stores numbers as Long by default)
+
+                    themeData["fontSize"] = fontSizeSp
+
+
+
                 if (fontColorHex != savedFontColor) themeData["fontColor"] = fontColorHex
                 if (align != savedAlign) themeData["fontAlign"] = align
                 if (fontStyle != savedStyle) themeData["fontStyle"] = fontStyle
                 if (themeColor != savedColor) themeData["themeColor"] = themeColor
                 if (themeByUrl != savedUrl) themeData["themeByUrl"] = themeByUrl
-                if (fontFamily != sharedPrefs.getString("fontFamily", "sans-serif")) {
+                if (fontFamily != savedFamily) {
                     themeData["fontFamily"] = fontFamily
                 }
-
-
 
                 if (themeData.isEmpty()) {
                     Log.d("ThemeSave", "No changes detected. Skipping Firestore update.")
@@ -390,7 +394,7 @@ class EditThemeActivity : AppCompatActivity() {
                         Log.d("ThemeSave", "Firestore update successful")
 
                         val editor = sharedPrefs.edit()
-                        editor.putFloat("fontSize", fontSizeSp)
+                        editor.putFloat("fontSize", fontSizeRounded.toFloat()) // Save as float locally
                         editor.putString("fontColor", fontColorHex)
                         editor.putString("fontAlign", align)
                         editor.putString("fontStyle", fontStyle)
@@ -513,10 +517,12 @@ class EditThemeActivity : AppCompatActivity() {
                     if (fontStyle is Int) {
                          selectedFontFamilyResId = fontStyle.toString()
                         selectedFontFamily = null // clear string
+
                         Log.d("fontName", "Selected resource font ID: $selectedFontFamilyResId")
                     } else if (fontStyle is String) {
                         selectedFontFamily = fontStyle
                         var selectedFontFamilyResId = null // clear resId
+
                         Log.d("fontName", "Selected system font name: $selectedFontFamily")
                     }
                 }

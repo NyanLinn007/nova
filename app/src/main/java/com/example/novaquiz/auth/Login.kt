@@ -92,8 +92,9 @@ class Login : AppCompatActivity() {
                                 editor.putString("fontStyle", document.getString("fontStyle") ?: "normal")
                                 editor.putString("themeByUrl", document.getString("themeByUrl") ?: "")
                                 editor.putFloat("fontSize", (document.getLong("fontSize") ?: 20L).toFloat())
+                                val fontFamily = document.getString("fontFamily") ?: "sans-serif"
+                                editor.putString("fontFamily", fontFamily)
 
-                                // When loading from Firestore document
                                 val themeColor = document.getString("themeColor") ?: ""
                                 editor.putString("themeColor", themeColor)
 
