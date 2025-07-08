@@ -27,9 +27,11 @@ import com.example.novaquiz.R
 import com.example.novaquiz.adapter.QuoteAdapter
 import com.example.novaquiz.data.Quote
 import com.example.novaquiz.databinding.ActivityMainBinding
+import com.example.novaquiz.api.OnFavoriteQuotesFetched
 import com.google.firebase.firestore.FirebaseFirestore
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), OnFavoriteQuotesFetched {
+
     private lateinit var binding: ActivityMainBinding
     private val db = FirebaseFirestore.getInstance()
     private val quoteList = mutableListOf<Quote>()
@@ -43,26 +45,22 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Initialize WebView container and WebView
+        // WebView init
         webViewContainer = findViewById(R.id.webViewContainer)
         webViewYoutube = findViewById(R.id.webViewYoutube)
 
-        // Setup WebView
         webViewYoutube.settings.javaScriptEnabled = true
         webViewYoutube.settings.domStorageEnabled = true
         webViewYoutube.settings.cacheMode = WebSettings.LOAD_DEFAULT
-
         webViewYoutube.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
                 url?.let { view?.loadUrl(it) }
                 return true
             }
         }
-
-        // Load YouTube Music URL once
         webViewYoutube.loadUrl("https://www.youtube.com/")
 
-        // Load preferences
+        // Load Preferences
         val shp = getSharedPreferences("UserData", Context.MODE_PRIVATE)
         val fontsize = shp.getFloat("fontSize", 16f)
         val fontColor = shp.getString("fontColor", "#000000") ?: "#000000"
@@ -72,7 +70,7 @@ class MainActivity : AppCompatActivity() {
         val bgColor = shp.getString("themeColor", null)
         val fontFamilyResIdString = shp.getString("fontFamily", null)
 
-        // Load background
+        // Background setup
         if (themeUrl.isNotEmpty()) {
             Glide.with(this)
                 .load(themeUrl)
@@ -90,7 +88,7 @@ class MainActivity : AppCompatActivity() {
             binding.backgroundImage.setImageResource(R.drawable.cloudy)
         }
 
-        // Convert stored font resource ID (String) to Typeface
+        // Font typeface
         val fontTypeface: Typeface = try {
             val fontResId = fontFamilyResIdString?.toIntOrNull() ?: 0
             if (fontResId != 0) {
@@ -103,9 +101,9 @@ class MainActivity : AppCompatActivity() {
             Typeface.DEFAULT
         }
 
-        // Setup RecyclerView
+        // RecyclerView
         adapter = QuoteAdapter(quoteList, fontsize, fontColor, fontAlign, fontStyle, fontTypeface)
-        binding.rvQuote.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        binding.rvQuote.layoutManager = LinearLayoutManager(this)
         binding.rvQuote.adapter = adapter
         PagerSnapHelper().attachToRecyclerView(binding.rvQuote)
 
@@ -117,14 +115,15 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "No internet connection. Please check your network.", Toast.LENGTH_LONG).show()
         }
 
-        // Navigation buttons
+        // Button actions
         binding.btnTheme.setOnClickListener { vibrateAndLaunchActivity(Theme::class.java) }
+        binding.btnProfile.setOnClickListener { vibrateAndLaunchActivity(Profile::class.java, false) }
+
         binding.btnGeneral.setOnClickListener {
             vibrate()
-            val generalSheet = General()
+            val generalSheet = General(this)
             generalSheet.show(supportFragmentManager, "GeneralBottomSheet")
         }
-        binding.btnProfile.setOnClickListener { vibrateAndLaunchActivity(Profile::class.java, finishAfter = false) }
 
         binding.btnmusic.setOnClickListener {
             webViewContainer.visibility = if (webViewContainer.visibility == View.VISIBLE) View.GONE else View.VISIBLE
@@ -159,13 +158,34 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
+    private fun fetchQuotes() {
+        db.collection("Quotes")
+            .orderBy("createdAt", com.google.firebase.firestore.Query.Direction.DESCENDING)
+            .get()
+            .addOnSuccessListener { result ->
+                quoteList.clear()
+                for (document in result) {
+                    val quote = Quote(
+                        text = document.getString("text") ?: "",
+                        reference = document.getString("reference") ?: "",
+                        Category = document.getString("Category") ?: "",
+                        createdAt = document.getString("createdAt") ?: "",
+                        quoteId = document.id
+                    )
+                    quoteList.add(quote)
+                }
+                adapter.notifyDataSetChanged()
+                showLoading(false)
+            }
+            .addOnFailureListener { exception ->
+                showLoading(false)
+                Toast.makeText(this, "Failed to fetch quotes: ${exception.message}", Toast.LENGTH_LONG).show()
+                Log.e("MainActivity", "Firestore fetch error", exception)
+            }
+    }
+
     private fun vibrateAndLaunchActivity(activityClass: Class<*>, finishAfter: Boolean = true) {
-        val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
-        } else {
-            vibrator.vibrate(50)
-        }
+        vibrate()
         startActivity(Intent(this, activityClass))
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         if (finishAfter) finish()
@@ -178,29 +198,6 @@ class MainActivity : AppCompatActivity() {
         } else {
             vibrator.vibrate(50)
         }
-    }
-
-    private fun fetchQuotes() {
-        db.collection("Quotes")
-            .orderBy("createdAt", com.google.firebase.firestore.Query.Direction.DESCENDING)
-            .get()
-            .addOnSuccessListener { result ->
-                quoteList.clear()
-                for (document in result) {
-                    val quote = Quote(
-                        text = document.getString("text") ?: "",
-                        reference = document.getString("reference") ?: ""
-                    )
-                    quoteList.add(quote)
-                }
-                adapter.notifyDataSetChanged()
-                showLoading(false)
-            }
-            .addOnFailureListener { exception ->
-                showLoading(false)
-                Toast.makeText(this, "Failed to fetch quotes: ${exception.message}", Toast.LENGTH_LONG).show()
-                Log.e("MainActivity", "Firestore fetch error", exception)
-            }
     }
 
     private fun showLoading(isLoading: Boolean) {
@@ -216,4 +213,17 @@ class MainActivity : AppCompatActivity() {
                 || capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
                 || capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
     }
+
+    override fun onFavoritesFetched(favoriteQuotes: List<Quote>) {
+        quoteList.clear()
+
+        for (quote in favoriteQuotes) {
+            Log.d("FavoriteQuote", "Quote ID: ${quote.quoteId}, Text: ${quote.text}, Ref: ${quote.reference}")
+        }
+        quoteList.addAll(favoriteQuotes)
+        adapter.notifyDataSetChanged()
+
+    }
+
+
 }

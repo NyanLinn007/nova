@@ -10,14 +10,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.novaquiz.R
 import com.example.novaquiz.data.Quote
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 
-
-
-class QuoteAdapter( private var quotes: List<Quote>,
+class QuoteAdapter(private var quotes: List<Quote>,
                     private val fontsize:Float,
                     private val fontColor: String,
                     private val fontAlign: String,
@@ -86,6 +87,8 @@ class QuoteAdapter( private var quotes: List<Quote>,
         holder.tvText.typeface = Typeface.create(fontFamily, style)
         holder.tvReference.typeface = Typeface.create(fontFamily, style)
 
+
+
 //        val scale = holder.itemView.resources.displayMetrics.density
 //        val sizePx = (fontsize * 3 * scale).toInt()
 
@@ -94,14 +97,39 @@ class QuoteAdapter( private var quotes: List<Quote>,
 //        holder.btnFavorite.layoutParams.width = sizePx
 //        holder.btnFavorite.layoutParams.height = sizePx
 
-        try {
-            val tintColor = Color.parseColor(fontColor)
-            holder.btnShare.setColorFilter(tintColor)
-            holder.btnFavorite.setColorFilter(tintColor)
-        } catch (e: Exception) {
-            holder.btnShare.setColorFilter(Color.BLACK)
-            holder.btnFavorite.setColorFilter(Color.BLACK)
+//        try {
+//            val tintColor = Color.parseColor(fontColor)
+//            holder.btnShare.setColorFilter(tintColor)
+//            holder.btnFavorite.setColorFilter(tintColor)
+//        } catch (e: Exception) {
+//            holder.btnShare.setColorFilter(Color.BLACK)
+//            holder.btnFavorite.setColorFilter(Color.BLACK)
+//        }
+
+        holder.btnFavorite.setOnClickListener {
+            val db = FirebaseFirestore.getInstance()
+            val auth = FirebaseAuth.getInstance()
+            val userId = auth.currentUser?.uid
+
+            if (userId != null && quote.quoteId.isNotEmpty()) {
+                val favoriteData = hashMapOf(
+                    "userId" to userId,
+                    "quoteId" to quote.quoteId
+                )
+
+                db.collection("Favorite")
+                    .add(favoriteData)
+                    .addOnSuccessListener {
+                        Toast.makeText(holder.itemView.context, "Added to favorites", Toast.LENGTH_SHORT).show()
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(holder.itemView.context, "Failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+            } else {
+                Toast.makeText(holder.itemView.context, "User not logged in or quoteId missing", Toast.LENGTH_SHORT).show()
+            }
         }
+
 
     }
 
