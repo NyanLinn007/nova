@@ -11,9 +11,11 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
+import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.example.novaquiz.R
 import com.example.novaquiz.data.Quote
+import com.example.novaquiz.view.ShareBottomSheet
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -127,6 +129,15 @@ class QuoteAdapter(private var quotes: List<Quote>,
                     }
             } else {
                 Toast.makeText(holder.itemView.context, "User not logged in or quoteId missing", Toast.LENGTH_SHORT).show()
+            }
+        }
+        holder.btnShare.setOnClickListener {
+            val bottomSheet = ShareBottomSheet(quote.text, quote.reference)
+            if (holder.itemView.context is FragmentActivity) {
+                bottomSheet.show(
+                    (holder.itemView.context as FragmentActivity).supportFragmentManager,
+                    "ShareBottomSheet"
+                )
             }
         }
 
