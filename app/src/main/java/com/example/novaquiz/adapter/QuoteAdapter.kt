@@ -108,31 +108,63 @@ class QuoteAdapter(private var quotes: List<Quote>,
 //            holder.btnFavorite.setColorFilter(Color.BLACK)
 //        }
 
+        holder.btnFavorite.setImageResource(
+            if (quote.favorite) R.drawable.ic_favoritefill else R.drawable.ic_favourite
+        )
+
         holder.btnFavorite.setOnClickListener {
             val db = FirebaseFirestore.getInstance()
             val auth = FirebaseAuth.getInstance()
             val userId = auth.currentUser?.uid
+            val docId = "${userId}_${quote.quoteId}"
+            val favoriteRef = db.collection("Favorite").document(docId)
 
             if (userId != null && quote.quoteId.isNotEmpty()) {
-                val favoriteData = hashMapOf(
-                    "userId" to userId,
-                    "quoteId" to quote.quoteId
+                val wasFavorite = quote.favorite
+
+                // Optimistically toggle UI
+                quote.favorite = !wasFavorite
+                holder.btnFavorite.setImageResource(
+                    if (quote.favorite) R.drawable.ic_favoritefill else R.drawable.ic_favourite
                 )
 
-                db.collection("Favorite")
-                    .add(favoriteData)
-                    .addOnSuccessListener {
-                        Toast.makeText(holder.itemView.context, "Added to favorites", Toast.LENGTH_SHORT).show()
-                    }
-                    .addOnFailureListener { e ->
-                        Toast.makeText(holder.itemView.context, "Failed: ${e.message}", Toast.LENGTH_SHORT).show()
-                    }
+                if (wasFavorite) {
+                    // Try to remove from favorites
+                    favoriteRef.delete()
+                        .addOnSuccessListener {
+                            Toast.makeText(holder.itemView.context, "Removed from favorites", Toast.LENGTH_SHORT).show()
+                        }
+                        .addOnFailureListener { e ->
+                            // Revert changes on failure
+                            quote.favorite = true
+                            holder.btnFavorite.setImageResource(R.drawable.ic_favoritefill)
+                            Toast.makeText(holder.itemView.context, "Failed to remove: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                } else {
+                    // Try to add to favorites
+                    val favoriteData = hashMapOf(
+                        "userId" to userId,
+                        "quoteId" to quote.quoteId
+                    )
+                    favoriteRef.set(favoriteData)
+                        .addOnSuccessListener {
+                            Toast.makeText(holder.itemView.context, "Added to favorites", Toast.LENGTH_SHORT).show()
+                        }
+                        .addOnFailureListener { e ->
+                            // Revert changes on failure
+                            quote.favorite = false
+                            holder.btnFavorite.setImageResource(R.drawable.ic_favourite)
+                            Toast.makeText(holder.itemView.context, "Failed to save: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                }
             } else {
                 Toast.makeText(holder.itemView.context, "User not logged in or quoteId missing", Toast.LENGTH_SHORT).show()
             }
         }
+
+
         holder.btnShare.setOnClickListener {
-            val bottomSheet = ShareBottomSheet(quote.text, quote.reference)
+            val bottomSheet = ShareBottomSheet(quote.quoteId,quote.text, quote.reference)
             if (holder.itemView.context is FragmentActivity) {
                 bottomSheet.show(
                     (holder.itemView.context as FragmentActivity).supportFragmentManager,

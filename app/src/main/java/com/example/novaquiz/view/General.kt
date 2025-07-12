@@ -68,13 +68,14 @@ class General(private val listener: OnFavoriteQuotesFetched) : BottomSheetDialog
                 }
 
                 listener.onFavoritesFetched(quotes)  // Using same callback to send quotes
+                Toast.makeText(requireContext(), "Go To General", Toast.LENGTH_SHORT).show()
+
                 dismiss()
             }
             .addOnFailureListener { e ->
                 Toast.makeText(requireContext(), "Failed to load quotes: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
-
     private fun fetchUserFavorites() {
         val db = FirebaseFirestore.getInstance()
         val auth = FirebaseAuth.getInstance()
@@ -87,34 +88,44 @@ class General(private val listener: OnFavoriteQuotesFetched) : BottomSheetDialog
 
         db.collection("Favorite")
             .whereEqualTo("userId", userId)
-                .get()
-                .addOnSuccessListener { result ->
-                    val quoteIds = result.documents.mapNotNull { it.getString("quoteId") }
+            .get()
+            .addOnSuccessListener { result ->
+                val quoteIds = result.documents.mapNotNull { it.getString("quoteId") }
 
-                    if (quoteIds.isEmpty()) {
-                        Toast.makeText(requireContext(), "No favorites found", Toast.LENGTH_SHORT).show()
-                        return@addOnSuccessListener
-                    }
-
-                    val tasks = quoteIds.map { id ->
-                        db.collection("Quotes").document(id).get()
-                    }
-
-                    Tasks.whenAllSuccess<DocumentSnapshot>(tasks)
-                        .addOnSuccessListener { documents ->
-                            val favoriteQuotes = documents.mapNotNull { doc ->
-                                val quote = doc.toObject(Quote::class.java)
-                                quote?.apply { quoteId = doc.id }
-                            }
-
-                            listener.onFavoritesFetched(favoriteQuotes)
-                            dismiss()
-                        }
-                        .addOnFailureListener { e ->
-                            Toast.makeText(requireContext(), "Error loading quotes: ${e.message}", Toast.LENGTH_SHORT).show()
-                        }
+                if (quoteIds.isEmpty()) {
+                    Toast.makeText(requireContext(), "No favorites found", Toast.LENGTH_SHORT).show()
+                    listener.onFavoritesFetched(emptyList())
+                    dismiss()
+                    return@addOnSuccessListener
                 }
+
+                val tasks = quoteIds.map { id ->
+                    db.collection("Quotes").document(id).get()
+                }
+
+                com.google.android.gms.tasks.Tasks.whenAllSuccess<DocumentSnapshot>(tasks)
+                    .addOnSuccessListener { documents ->
+                        val favoriteQuotes = documents.mapNotNull { doc ->
+                            val quote = doc.toObject(Quote::class.java)
+                            quote?.apply {
+                                quoteId = doc.id
+                                favorite = true  // ✅ Mark as favorite
+                            }
+                        }
+
+                        listener.onFavoritesFetched(favoriteQuotes)
+                        Toast.makeText(requireContext(), "Go To Favorite", Toast.LENGTH_SHORT).show()
+                        dismiss()
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(requireContext(), "Error loading quotes: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(requireContext(), "Failed to load favorites: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
     }
+
 
     override fun onStart() {
         super.onStart()

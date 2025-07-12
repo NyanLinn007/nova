@@ -28,6 +28,7 @@ import com.example.novaquiz.adapter.QuoteAdapter
 import com.example.novaquiz.data.Quote
 import com.example.novaquiz.databinding.ActivityMainBinding
 import com.example.novaquiz.api.OnFavoriteQuotesFetched
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
 class MainActivity : AppCompatActivity(), OnFavoriteQuotesFetched {
@@ -159,30 +160,53 @@ class MainActivity : AppCompatActivity(), OnFavoriteQuotesFetched {
     }
 
     private fun fetchQuotes() {
-        db.collection("Quotes")
-            .orderBy("createdAt", com.google.firebase.firestore.Query.Direction.DESCENDING)
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        showLoading(true)
+
+        // Step 1: Get all favorites of the current user
+        db.collection("Favorite")
+            .whereEqualTo("userId", userId)
             .get()
-            .addOnSuccessListener { result ->
-                quoteList.clear()
-                for (document in result) {
-                    val quote = Quote(
-                        text = document.getString("text") ?: "",
-                        reference = document.getString("reference") ?: "",
-                        Category = document.getString("Category") ?: "",
-                        createdAt = document.getString("createdAt") ?: "",
-                        quoteId = document.id
-                    )
-                    quoteList.add(quote)
-                }
-                adapter.notifyDataSetChanged()
-                showLoading(false)
+            .addOnSuccessListener { favResult ->
+                // Build a set of favorite quoteIds
+                val favoriteQuoteIds = favResult.documents.mapNotNull { it.getString("quoteId") }.toSet()
+
+                // Step 2: Get all quotes
+                db.collection("Quotes")
+                    .orderBy("createdAt", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                    .get()
+                    .addOnSuccessListener { result ->
+                        quoteList.clear()
+                        for (document in result) {
+                            val quoteId = document.id
+                            val isFavorite = favoriteQuoteIds.contains(quoteId)
+
+                            val quote = Quote(
+                                text = document.getString("text") ?: "",
+                                reference = document.getString("reference") ?: "",
+                                Category = document.getString("Category") ?: "",
+                                createdAt = document.getString("createdAt") ?: "",
+                                quoteId = quoteId,
+                                favorite = isFavorite  // set favorite status
+                            )
+                            quoteList.add(quote)
+                        }
+                        adapter.notifyDataSetChanged()
+                        showLoading(false)
+                    }
+                    .addOnFailureListener { exception ->
+                        showLoading(false)
+                        Toast.makeText(this, "Failed to fetch quotes: ${exception.message}", Toast.LENGTH_LONG).show()
+                        Log.e("MainActivity", "Quotes fetch error", exception)
+                    }
             }
             .addOnFailureListener { exception ->
                 showLoading(false)
-                Toast.makeText(this, "Failed to fetch quotes: ${exception.message}", Toast.LENGTH_LONG).show()
-                Log.e("MainActivity", "Firestore fetch error", exception)
+                Toast.makeText(this, "Failed to fetch favorites: ${exception.message}", Toast.LENGTH_LONG).show()
+                Log.e("MainActivity", "Favorites fetch error", exception)
             }
     }
+
 
     private fun vibrateAndLaunchActivity(activityClass: Class<*>, finishAfter: Boolean = true) {
         vibrate()

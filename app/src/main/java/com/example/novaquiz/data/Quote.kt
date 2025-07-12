@@ -8,5 +8,6 @@ data class Quote(
     val reference :String="",
     val text :String="",
     @get:Exclude
-    var quoteId: String = ""
+    var quoteId: String = "",
+    @get:Exclude var favorite: Boolean = false
 )
