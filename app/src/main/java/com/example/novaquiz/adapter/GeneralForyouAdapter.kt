@@ -33,7 +33,7 @@ class GeneralForyouAdapter:RecyclerView.Adapter<GeneralForyouAdapter.ForyouViewH
     override fun onBindViewHolder(holder: ForyouViewHolder, position: Int) {
         val title=items[position]
         holder.txtforyou.text=title
-        holder.imgforyou.setImageResource(R.drawable.ic_favourite)
+        holder.imgforyou.setImageResource(R.drawable.rightarrow)
 
         holder.itemView.setOnClickListener {
             Toast.makeText(holder.itemView.context,"This is For you",Toast.LENGTH_SHORT).show()

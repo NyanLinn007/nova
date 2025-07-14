@@ -2,6 +2,10 @@ package com.example.novaquiz.adapter
 
 
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
 import android.graphics.Color
 import android.graphics.Typeface
 import android.view.Gravity
@@ -112,6 +116,7 @@ class QuoteAdapter(private var quotes: List<Quote>,
             if (quote.favorite) R.drawable.ic_favoritefill else R.drawable.ic_favourite
         )
 
+        // Favorite click listener
         holder.btnFavorite.setOnClickListener {
             val db = FirebaseFirestore.getInstance()
             val auth = FirebaseAuth.getInstance()
@@ -121,27 +126,48 @@ class QuoteAdapter(private var quotes: List<Quote>,
 
             if (userId != null && quote.quoteId.isNotEmpty()) {
                 val wasFavorite = quote.favorite
+                val isNowFavorite = !wasFavorite
 
-                // Optimistically toggle UI
-                quote.favorite = !wasFavorite
-                holder.btnFavorite.setImageResource(
-                    if (quote.favorite) R.drawable.ic_favoritefill else R.drawable.ic_favourite
-                )
+                // Update local model
+                quote.favorite = isNowFavorite
 
+                // Animate the button
+                val scaleUpX = ObjectAnimator.ofFloat(holder.btnFavorite, "scaleX", 1f, 1.3f)
+                val scaleUpY = ObjectAnimator.ofFloat(holder.btnFavorite, "scaleY", 1f, 1.3f)
+                val scaleDownX = ObjectAnimator.ofFloat(holder.btnFavorite, "scaleX", 1.3f, 1f)
+                val scaleDownY = ObjectAnimator.ofFloat(holder.btnFavorite, "scaleY", 1.3f, 1f)
+
+                scaleUpX.duration = 100
+                scaleUpY.duration = 100
+                scaleDownX.duration = 100
+                scaleDownY.duration = 100
+
+                val animatorSet = AnimatorSet()
+                animatorSet.play(scaleUpX).with(scaleUpY)
+                animatorSet.play(scaleDownX).with(scaleDownY).after(scaleUpX)
+
+                animatorSet.addListener(object : AnimatorListenerAdapter() {
+                    override fun onAnimationStart(animation: Animator) {
+                        holder.btnFavorite.setImageResource(
+                            if (isNowFavorite) R.drawable.ic_favoritefill else R.drawable.ic_favourite
+                        )
+                    }
+                })
+                animatorSet.start()
+
+                // Firestore Update
                 if (wasFavorite) {
-                    // Try to remove from favorites
                     favoriteRef.delete()
                         .addOnSuccessListener {
                             Toast.makeText(holder.itemView.context, "Removed from favorites", Toast.LENGTH_SHORT).show()
                         }
                         .addOnFailureListener { e ->
-                            // Revert changes on failure
+                            // Revert on failure
                             quote.favorite = true
                             holder.btnFavorite.setImageResource(R.drawable.ic_favoritefill)
                             Toast.makeText(holder.itemView.context, "Failed to remove: ${e.message}", Toast.LENGTH_SHORT).show()
                         }
                 } else {
-                    // Try to add to favorites
                     val favoriteData = hashMapOf(
                         "userId" to userId,
                         "quoteId" to quote.quoteId
@@ -151,7 +177,6 @@ class QuoteAdapter(private var quotes: List<Quote>,
                             Toast.makeText(holder.itemView.context, "Added to favorites", Toast.LENGTH_SHORT).show()
                         }
                         .addOnFailureListener { e ->
-                            // Revert changes on failure
                             quote.favorite = false
                             holder.btnFavorite.setImageResource(R.drawable.ic_favourite)
                             Toast.makeText(holder.itemView.context, "Failed to save: ${e.message}", Toast.LENGTH_SHORT).show()
@@ -161,7 +186,6 @@ class QuoteAdapter(private var quotes: List<Quote>,
                 Toast.makeText(holder.itemView.context, "User not logged in or quoteId missing", Toast.LENGTH_SHORT).show()
             }
         }
-
 
         holder.btnShare.setOnClickListener {
             val bottomSheet = ShareBottomSheet(quote.quoteId,quote.text, quote.reference)

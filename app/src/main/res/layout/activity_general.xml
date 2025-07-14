@@ -21,12 +21,15 @@
             android:orientation="horizontal"
             android:gravity="center_vertical">
 
-            <ImageView
+            <TextView
                 android:id="@+id/btnclose"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:contentDescription="Close icon"
-                android:src="@drawable/ic_close" />
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Close"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                 />
 
             <TextView
                 android:id="@+id/textView7"
@@ -88,7 +91,7 @@
             <RelativeLayout
                 android:id="@+id/my_favorite"
                 android:layout_width="0dp"
-                android:layout_height="100dp"
+                android:layout_height="80dp"
                 android:layout_margin="6dp"
                 android:layout_weight="1"
                 android:background="@drawable/item_bg">
@@ -121,7 +124,7 @@
             <RelativeLayout
                 android:id="@+id/general"
                 android:layout_width="0dp"
-                android:layout_height="100dp"
+                android:layout_height="80dp"
                 android:layout_margin="6dp"
                 android:layout_weight="1"
                 android:background="@drawable/item_bg">
@@ -146,7 +149,7 @@
                     android:layout_alignParentTop="true"
                     android:layout_alignParentEnd="true"
                     android:layout_margin="8dp"
-                    android:src="@drawable/ic_favourite" />
+                    android:src="@drawable/ic_menu" />
 
             </RelativeLayout>
 

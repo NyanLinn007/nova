@@ -1,6 +1,10 @@
 package com.example.novaquiz.adapter
 
+import android.content.Context
 import android.content.Intent
+import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,6 +30,13 @@ class ThemeAdapter : RecyclerView.Adapter<ThemeAdapter.ThemeViewHolder>() {
         val title = titles[position]
         holder.button.text=title
         holder.button.setOnClickListener {
+
+            val vibrator = holder.itemView.context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
+            } else {
+                vibrator.vibrate(50)
+            }
             if(title=="Edit"){
                 val context = holder.itemView.context
                 val intent = Intent(context, EditThemeActivity::class.java)

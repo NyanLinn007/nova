@@ -34,7 +34,7 @@ class GeneralPopularAdapter: RecyclerView.Adapter<GeneralPopularAdapter.GeneralV
     override fun onBindViewHolder(holder: GeneralPopularAdapter.GeneralViewHolder, position: Int) {
         val title=items[position]
         holder.txtpopular.text=title
-        holder.icon.setImageResource(R.drawable.ic_favourite)
+        holder.icon.setImageResource(R.drawable.rightarrow)
 
         holder.itemView.setOnClickListener {
             Toast.makeText(holder.itemView.context,"This is Popular",Toast.LENGTH_SHORT).show()

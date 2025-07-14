@@ -75,8 +75,6 @@ class MainActivity : AppCompatActivity(), OnFavoriteQuotesFetched {
         if (themeUrl.isNotEmpty()) {
             Glide.with(this)
                 .load(themeUrl)
-                .placeholder(R.drawable.cloudy)
-                .error(R.drawable.cloudy)
                 .into(binding.backgroundImage)
         } else if (!bgColor.isNullOrEmpty()) {
             try {
@@ -127,6 +125,7 @@ class MainActivity : AppCompatActivity(), OnFavoriteQuotesFetched {
         }
 
         binding.btnmusic.setOnClickListener {
+            vibrate()
             webViewContainer.visibility = if (webViewContainer.visibility == View.VISIBLE) View.GONE else View.VISIBLE
         }
 

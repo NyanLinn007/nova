@@ -4,9 +4,12 @@ import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.view.View
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
@@ -52,6 +55,7 @@ class Theme : AppCompatActivity() {
        binding.rvforyou.adapter=adapter
 
         binding.btnclose.setOnClickListener {
+            vibrate()
             navigateBackToMain()
 
         }
@@ -114,5 +118,14 @@ class Theme : AppCompatActivity() {
         val network = connectivityManager.activeNetwork ?: return false
         val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
         return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+    }
+
+    private fun vibrate() {
+        val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
+        } else {
+            vibrator.vibrate(50)
+        }
     }
 }

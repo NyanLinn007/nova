@@ -16,7 +16,6 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.DocumentSnapshot
-import com.google.android.gms.tasks.Tasks
 
 import com.example.novaquiz.data.Quote
 
@@ -57,25 +56,51 @@ class General(private val listener: OnFavoriteQuotesFetched) : BottomSheetDialog
     }
     private fun fetchQuotesFromGeneral() {
         val db = FirebaseFirestore.getInstance()
+        val auth = FirebaseAuth.getInstance()
+        val userId = auth.currentUser?.uid
 
+        if (userId == null) {
+            Toast.makeText(requireContext(), "User not logged in", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Step 1: Fetch all quotes
         db.collection("Quotes")
             .orderBy("createdAt", com.google.firebase.firestore.Query.Direction.DESCENDING)
             .get()
             .addOnSuccessListener { result ->
-                val quotes = result.documents.mapNotNull { doc ->
+                val allQuotes = result.documents.mapNotNull { doc ->
                     val quote = doc.toObject(com.example.novaquiz.data.Quote::class.java)
                     quote?.apply { quoteId = doc.id }
                 }
 
-                listener.onFavoritesFetched(quotes)  // Using same callback to send quotes
-                Toast.makeText(requireContext(), "Go To General", Toast.LENGTH_SHORT).show()
+                // Step 2: Fetch all favorite docIds for the user
+                db.collection("Favorite")
+                    .whereEqualTo("userId", userId)
+                    .get()
+                    .addOnSuccessListener { favSnapshot ->
+                        val favoriteIds = favSnapshot.documents.mapNotNull { it.getString("quoteId") }
 
-                dismiss()
+                        // Step 3: Mark quotes as favorite
+                        allQuotes.forEach { quote ->
+                            quote.favorite = favoriteIds.contains(quote.quoteId)
+                        }
+
+                        // Step 4: Send to UI
+                        listener.onFavoritesFetched(allQuotes)
+                        Toast.makeText(requireContext(), "Go To General", Toast.LENGTH_SHORT).show()
+                        dismiss()
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(requireContext(), "Failed to load favorites: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+
             }
             .addOnFailureListener { e ->
                 Toast.makeText(requireContext(), "Failed to load quotes: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
+
     private fun fetchUserFavorites() {
         val db = FirebaseFirestore.getInstance()
         val auth = FirebaseAuth.getInstance()

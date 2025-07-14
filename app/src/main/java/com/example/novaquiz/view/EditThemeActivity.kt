@@ -9,6 +9,8 @@ import android.graphics.fonts.FontStyle
 import android.graphics.text.LineBreaker
 import android.os.Build
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.util.Log
 import android.util.TypedValue
 import android.view.Gravity
@@ -156,10 +158,23 @@ class EditThemeActivity : AppCompatActivity() {
         binding.fontSeekBar.thumb = thumbDrawable
 
         binding.btnClose.setOnClickListener {
+            val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
+            } else {
+                vibrator.vibrate(50)
+            }
             navigateBackToMain()
         }
 
         binding.txtBackground.setOnClickListener {
+
+            val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
+            } else {
+                vibrator.vibrate(50)
+            }
             // Select txtBackground tab
             binding.txtBackground.setBackgroundResource(R.drawable.bg_tab_selected)
             binding.txtText.setBackgroundResource(R.drawable.bg_tab_unselected)
@@ -174,6 +189,12 @@ class EditThemeActivity : AppCompatActivity() {
         }
 
         binding.txtText.setOnClickListener {
+            val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
+            } else {
+                vibrator.vibrate(50)
+            }
             // Select txtText tab
             binding.txtText.setBackgroundResource(R.drawable.bg_tab_selected)
             binding.txtBackground.setBackgroundResource(R.drawable.bg_tab_unselected)
@@ -191,6 +212,12 @@ class EditThemeActivity : AppCompatActivity() {
         var isBold = false
 
         binding.tvStyleToggle.setOnClickListener {
+            val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
+            } else {
+                vibrator.vibrate(50)
+            }
             isBold = !isBold
 
             // Toggle bold style for center EditText
@@ -205,6 +232,12 @@ class EditThemeActivity : AppCompatActivity() {
 
 
         binding.imgAlignToggle.setOnClickListener {
+            val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
+            } else {
+                vibrator.vibrate(50)
+            }
             currentAlign = when (currentAlign) {
                 "center" -> {
                     applyAlignment("start")
@@ -236,6 +269,12 @@ class EditThemeActivity : AppCompatActivity() {
         binding.colorScroll.visibility = View.GONE
 
         binding.stylefont.setOnClickListener {
+            val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
+            } else {
+                vibrator.vibrate(50)
+            }
             binding.fontStyleScroll.visibility =
                 if (binding.fontStyleScroll.visibility == View.VISIBLE) View.GONE else View.VISIBLE
 
@@ -252,6 +291,12 @@ class EditThemeActivity : AppCompatActivity() {
 
 
         binding.imgColorWheel.setOnClickListener {
+            val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
+            } else {
+                vibrator.vibrate(50)
+            }
             binding.colorScroll.visibility =
                 if (binding.colorScroll.visibility == View.VISIBLE) View.GONE else View.VISIBLE
 
@@ -263,6 +308,12 @@ class EditThemeActivity : AppCompatActivity() {
 
 
         binding.bgcolorwheel.setOnClickListener {
+            val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
+            } else {
+                vibrator.vibrate(50)
+            }
             binding.bgcolorScroll.visibility =
                 if (binding.bgcolorScroll.visibility == View.VISIBLE) View.GONE else View.VISIBLE
 
@@ -273,6 +324,12 @@ class EditThemeActivity : AppCompatActivity() {
         }
 
         binding.bgGallary.setOnClickListener {
+            val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
+            } else {
+                vibrator.vibrate(50)
+            }
             if (binding.bgcolorScroll.visibility == View.VISIBLE) {
                 binding.bgcolorScroll.visibility = View.GONE
             }
@@ -297,6 +354,12 @@ class EditThemeActivity : AppCompatActivity() {
         }
 
         binding.bgGallary.setOnClickListener {
+            val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
+            } else {
+                vibrator.vibrate(50)
+            }
             val unsplashSheet = UnsplashBottomSheet()
             unsplashSheet.setOnPhotoSelectedListener(object :
                 UnsplashBottomSheet.OnPhotoSelectedListener {
@@ -320,6 +383,12 @@ class EditThemeActivity : AppCompatActivity() {
             unsplashSheet.show(supportFragmentManager, "UnsplashSheet")
         }
         binding.donebutton.setOnClickListener {
+            val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
+            } else {
+                vibrator.vibrate(50)
+            }
             try {
                 Log.d("ThemeSave", "Save button clicked")
 
@@ -619,15 +688,10 @@ class EditThemeActivity : AppCompatActivity() {
         }
     }
 
-
-
-
-
     private fun navigateBackToMain() {
-            val intent = Intent(this, Theme::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
-            startActivity(intent)
-            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
-            finish()
-        }
+        val intent = Intent(this,Theme::class.java)
+        startActivity(intent)
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+        finish()
+    }
     }
