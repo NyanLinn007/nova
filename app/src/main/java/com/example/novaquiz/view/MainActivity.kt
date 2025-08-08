@@ -63,6 +63,7 @@ class MainActivity : AppCompatActivity(), OnFavoriteQuotesFetched {
 
         // Load Preferences
         val shp = getSharedPreferences("UserData", Context.MODE_PRIVATE)
+        val username = shp.getString("name", "") ?: ""
         val fontsize = shp.getFloat("fontSize", 16f)
         val fontColor = shp.getString("fontColor", "#000000") ?: "#000000"
         val fontAlign = shp.getString("fontAlign", "center") ?: "center"
@@ -70,6 +71,7 @@ class MainActivity : AppCompatActivity(), OnFavoriteQuotesFetched {
         val themeUrl = shp.getString("themeByUrl", "") ?: ""
         val bgColor = shp.getString("themeColor", null)
         val fontFamilyResIdString = shp.getString("fontFamily", null)
+        Log.d("MainActivity", "Loaded username from SharedPreferences: $username")
 
         // Background setup
         if (themeUrl.isNotEmpty()) {

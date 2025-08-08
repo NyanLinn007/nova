@@ -29,7 +29,7 @@ class Profile : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.rvAccount.layoutManager=LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false)
-        accountAdapter= AccountAdapter()
+        accountAdapter= AccountAdapter(this)
         binding.rvAccount.adapter=accountAdapter
 
         binding.rvFollow.layoutManager=LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false)

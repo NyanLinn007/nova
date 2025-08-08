@@ -7,19 +7,20 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.novaquiz.R
-import com.example.novaquiz.adapter.AccountAdapter.AccountViewHolder
 
 class FollowAdapter( private val onItemClick: (String) -> Unit):RecyclerView.Adapter<FollowAdapter.FollowViewHolder>() {
-    private val lables= listOf("Profile","Setting","Logout")
+    private val lables= listOf("Instagram","TikTok","Facebook","Logout")
     private val startIcon= listOf(
-        R.drawable.ic_favourite,
-        R.drawable.ic_favourite,
-        R.drawable.ic_favourite
+        R.drawable.instagram3,
+        R.drawable.tik,
+        R.drawable.facebookapp,
+        R.drawable.logout
     )
     private val endIcon= listOf(
-        R.drawable.ic_close,
-        R.drawable.ic_close,
-        R.drawable.ic_close
+        R.drawable.arrow1,
+        R.drawable.arrow1,
+        R.drawable.arrow1,
+        R.drawable.arrow1
     )
     class FollowViewHolder(itemView: View) :RecyclerView.ViewHolder(itemView){
 

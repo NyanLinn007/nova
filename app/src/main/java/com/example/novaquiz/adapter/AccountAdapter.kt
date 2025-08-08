@@ -1,5 +1,6 @@
 package com.example.novaquiz.adapter
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,18 +9,18 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.novaquiz.R
 
-class AccountAdapter:RecyclerView.Adapter<AccountAdapter.AccountViewHolder>() {
+class AccountAdapter(private val context: Context):RecyclerView.Adapter<AccountAdapter.AccountViewHolder>() {
 
-    private val lables= listOf("Profile","Setting","Logout")
+    private val shp = context.getSharedPreferences("UserData", Context.MODE_PRIVATE)
+    private val username = shp.getString("name", "") ?: ""
+
+    private val labels = listOf(username)
     private val startIcon= listOf(
-        R.drawable.ic_favourite,
-        R.drawable.ic_favourite,
-        R.drawable.ic_favourite
+        R.drawable.profile1,
     )
     private val endIcon= listOf(
-        R.drawable.ic_close,
-        R.drawable.ic_close,
-        R.drawable.ic_close
+        R.drawable.arrow1,
+
     )
 
     class AccountViewHolder(itemView: View) :RecyclerView.ViewHolder(itemView){
@@ -40,12 +41,12 @@ class AccountAdapter:RecyclerView.Adapter<AccountAdapter.AccountViewHolder>() {
 
     override fun onBindViewHolder(holder: AccountAdapter.AccountViewHolder, position: Int) {
         holder.icon.setImageResource(startIcon[position])
-        holder.text.text=lables[position]
+        holder.text.text = labels[position]
         holder.endicon.setImageResource(endIcon[position])
 
     }
 
     override fun getItemCount(): Int {
-        return lables.size
+        return labels.size
     }
 }

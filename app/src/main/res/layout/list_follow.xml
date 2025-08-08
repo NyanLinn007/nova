@@ -9,8 +9,8 @@
     <!-- Start Icon -->
     <ImageView
         android:id="@+id/start"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
         android:layout_marginStart="16dp"
         android:src="@drawable/ic_favourite"
         android:contentDescription="Start Icon" />
@@ -20,7 +20,7 @@
         android:id="@+id/txtfollow"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="10dp"
         android:text="Login"
         android:textColor="@android:color/white"
         android:textSize="18sp" />
@@ -34,8 +34,8 @@
     <!-- End Icon -->
     <ImageView
         android:id="@+id/end"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
         android:layout_marginEnd="16dp"
         android:src="@drawable/ic_favourite"
         android:contentDescription="End Icon" />
